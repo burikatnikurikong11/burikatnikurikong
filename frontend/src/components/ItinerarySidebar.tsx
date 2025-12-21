@@ -12,10 +12,10 @@ interface ItinerarySidebarProps {
 function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onToggleExpanded }: ItinerarySidebarProps) {
   return (
     <>
-      {/* Desktop: Left sidebar with collapse button, Mobile: Bottom sheet */}
+      {/* Desktop: Floating card sidebar, Mobile: Bottom sheet */}
       <div
         className={`
-          ${isMobile ? 'fixed bottom-0 left-0 right-0' : 'relative h-full'}
+          ${isMobile ? 'fixed bottom-0 left-0 right-0' : ''}
           ${isMobile && !isOpen ? 'translate-y-full' : ''}
           transition-all duration-300 ease-out
           bg-white
@@ -29,7 +29,7 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
           flexShrink: 0,
           minWidth: !isMobile && isOpen ? (isExpanded ? '600px' : '350px') : '0',
           maxWidth: !isMobile && isOpen ? (isExpanded ? '900px' : '450px') : '0',
-          boxShadow: isMobile ? '0 -4px 20px rgba(0, 0, 0, 0.08)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
+          boxShadow: isMobile ? '0 -4px 20px rgba(0, 0, 0, 0.08)' : isOpen ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
         }}
       >
         {/* Collapse/Expand Button - Desktop Only, positioned on right edge */}
