@@ -116,8 +116,44 @@ export default function Discover({
   // Handle category selection
   const handleCategorySelect = useCallback((categoryId: string | null) => {
     setSelectedCategory(categoryId)
-    // TODO: Filter markers based on category
-    // This will be implemented when you have category data in your tourist spots
+    
+    // Show toast notification
+    if (categoryId) {
+      const categoryNames: Record<string, string> = {
+        beaches: 'Beaches',
+        nature: 'Nature',
+        food: 'Food & Dining',
+        accommodation: 'Hotels & Accommodation',
+        activities: 'Activities',
+        culture: 'Culture & Heritage'
+      }
+      
+      toast.success(
+        `Filtering by ${categoryNames[categoryId] || categoryId}`,
+        {
+          duration: 2000,
+          icon: '🔍',
+          style: {
+            background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            color: 'white',
+            fontWeight: '600'
+          }
+        }
+      )
+    } else {
+      toast.success(
+        'Showing all attractions',
+        {
+          duration: 2000,
+          icon: '🌍',
+          style: {
+            background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            color: 'white',
+            fontWeight: '600'
+          }
+        }
+      )
+    }
   }, [])
   
   // Handle closing tourist spot info
@@ -348,6 +384,20 @@ export default function Discover({
     }
   }, [selectedTouristSpot, selectedPlace, selectedMunicipalityGeocode])
 
+  // Filter models by category
+  const categoryFilteredModels = useMemo(() => {
+    if (!selectedCategory) {
+      return touristSpotModels // Show all if no category selected
+    }
+    
+    return touristSpotModels.filter(model => {
+      if (!model.categories || model.categories.length === 0) {
+        return false // Don't show spots without categories when filtering
+      }
+      return model.categories.includes(selectedCategory)
+    })
+  }, [selectedCategory])
+
   // Initialize the map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -419,7 +469,8 @@ export default function Discover({
           const clickedLng = e.lngLat.lng
           const clickedLat = e.lngLat.lat
           
-          for (const model of touristSpotModels) {
+          // Only check category-filtered models
+          for (const model of categoryFilteredModels) {
             const distance = calculateDistanceDegrees(
               [clickedLng, clickedLat],
               model.coordinates
@@ -735,7 +786,7 @@ export default function Discover({
         eventHandlersRef.current = {}
       }
     }
-  }, [])
+  }, [categoryFilteredModels]) // Add dependency
 
   // Update terrain when terrainEnabled changes
   useEffect(() => {
@@ -778,7 +829,8 @@ export default function Discover({
     }
   }, [map, terrainEnabled])
 
-  useMap3DModels(modelsEnabled ? map : null, touristSpotModels)
+  // Pass category-filtered models to 3D rendering
+  useMap3DModels(modelsEnabled ? map : null, categoryFilteredModels)
 
   useEffect(() => {
     selectedMunicipalityRef.current = selectedMunicipalityGeocode
@@ -786,6 +838,7 @@ export default function Discover({
 
   const activeMarkersGeocode = selectedMunicipalityGeocode || selectedPlaceMunicipalityGeocode
 
+  // Filter by both municipality AND category
   const filteredModels = useMemo(() => {
     if (!activeMarkersGeocode || !municipalityGeoJson) {
       return []
@@ -802,14 +855,15 @@ export default function Discover({
       return []
     }
 
-    const filtered = touristSpotModels.filter((model) => {
+    // First filter by municipality
+    let filtered = categoryFilteredModels.filter((model) => {
       return municipalityFeatures.some((feature) => {
         return isPointInGeoJSONFeature(model.coordinates, feature)
       })
     })
 
     return filtered
-  }, [activeMarkersGeocode, municipalityGeoJson])
+  }, [activeMarkersGeocode, municipalityGeoJson, categoryFilteredModels])
   
   // Show toast notification when municipality is selected
   useEffect(() => {

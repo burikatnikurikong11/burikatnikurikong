@@ -16,5 +16,6 @@ export interface Model3DConfig {
   scale?: number
   /** Optional name/description for the tourist spot */
   name?: string
+  /** Categories this spot belongs to (beaches, nature, food, accommodation, activities, culture) */
+  categories?: string[]
 }
-
