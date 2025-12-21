@@ -159,3 +159,12 @@ html, body {
     opacity: 0;
   }
 }
+
+/* Utility class for fade-in animation */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-bounceIn {
+  animation: bounceIn 0.4s ease-out forwards;
+}
