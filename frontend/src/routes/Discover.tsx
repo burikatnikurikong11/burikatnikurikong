@@ -19,6 +19,7 @@ import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../consta
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
 import toast from 'react-hot-toast'
 import { matchPlaceToModel } from '../utils/matchPlaceToModel'
+import { loadAllTouristSpots } from '../utils/loadGeoJsonSpots'
 import type { PlaceInfo as PlaceInfoType } from '../types/api'
 import type { Place } from '../types/place'
 
@@ -54,6 +55,9 @@ export default function Discover({
   // Category filter state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   
+  // All tourist spots loaded from GeoJSON
+  const [allTouristSpots, setAllTouristSpots] = useState<Place[]>([])
+  
   // Municipality tooltip state
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
@@ -82,34 +86,36 @@ export default function Discover({
     return touristSpotModels.find(m => m.id === selectedTouristSpot) || null
   }, [selectedTouristSpot])
   
+  // Load all tourist spots from GeoJSON files on mount
+  useEffect(() => {
+    loadAllTouristSpots()
+      .then(spots => {
+        setAllTouristSpots(spots)
+        console.log(`Loaded ${spots.length} tourist spots from GeoJSON files`)
+      })
+      .catch(error => {
+        console.error('Failed to load tourist spots:', error)
+      })
+  }, [])
+  
   // Helper function to calculate padding for sidebar offset
-  // This ensures the camera centers on the visible map area, not on the marker itself
   const getPaddingForSidebar = useCallback(() => {
     if (!map || isMobile || !isSidebarOpen) {
       return { left: 0, right: 0, top: 0, bottom: 0 }
     }
     
-    // Calculate itinerary panel width based on expanded state
     const itineraryWidthPercent = isItineraryExpanded ? 60 : 30
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
-    
-    // Account for the minimalist sidebar (72px + 8px margin = 80px)
     const minimalistSidebarWidth = 80
-    
-    // Calculate actual itinerary panel width in pixels
-    // The itinerary takes up a percentage of the remaining width after the minimalist sidebar
-    const availableWidth = windowWidth - minimalistSidebarWidth - 8 // 8px for gaps
+    const availableWidth = windowWidth - minimalistSidebarWidth - 8
     const itineraryWidth = (availableWidth * itineraryWidthPercent) / 100
     
-    // To center the camera on the visible map area:
-    // Add left padding equal to half the itinerary width
-    // This shifts the center point to the middle of the visible map
     return {
       left: itineraryWidth / 2,
       right: 0,
       top: 0,
-      bottom: windowHeight * 0.1 // Small bottom padding
+      bottom: windowHeight * 0.1
     }
   }, [map, isMobile, isSidebarOpen, isItineraryExpanded])
   
@@ -117,7 +123,6 @@ export default function Discover({
   const handleCategorySelect = useCallback((categoryId: string | null) => {
     setSelectedCategory(categoryId)
     
-    // Show toast notification
     if (categoryId) {
       const categoryNames: Record<string, string> = {
         beaches: 'Beaches',
@@ -128,8 +133,10 @@ export default function Discover({
         culture: 'Culture & Heritage'
       }
       
+      const filteredCount = allTouristSpots.filter(spot => spot.category === categoryId).length
+      
       toast.success(
-        `Filtering by ${categoryNames[categoryId] || categoryId}`,
+        `Found ${filteredCount} ${categoryNames[categoryId] || categoryId} spot${filteredCount === 1 ? '' : 's'}`,
         {
           duration: 2000,
           icon: '🔍',
@@ -142,7 +149,7 @@ export default function Discover({
       )
     } else {
       toast.success(
-        'Showing all attractions',
+        `Showing all ${allTouristSpots.length} attractions`,
         {
           duration: 2000,
           icon: '🌍',
@@ -154,7 +161,7 @@ export default function Discover({
         }
       )
     }
-  }, [])
+  }, [allTouristSpots])
   
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
@@ -200,18 +207,15 @@ export default function Discover({
         styleUrl = `https://api.maptiler.com/maps/streets-v2/style.json?key=${apiKey}`
         break
       case 'transport':
-        // Using basic-v2 as transport style (placeholder until you have a custom transport style)
         styleUrl = `https://api.maptiler.com/maps/basic-v2/style.json?key=${apiKey}`
         break
     }
     
     map.setStyle(styleUrl)
     
-    // Re-add sources and layers after style change
     map.once('style.load', () => {
       if (!map) return
       
-      // Re-add terrain source
       if (!map.getSource('terrainSource')) {
         map.addSource('terrainSource', {
           type: 'raster-dem',
@@ -221,7 +225,6 @@ export default function Discover({
         })
       }
       
-      // Re-add province boundaries if we have them
       if (municipalityGeoJson && !map.getSource('provinceBoundaries')) {
         map.addSource('provinceBoundaries', {
           type: 'geojson',
@@ -258,7 +261,6 @@ export default function Discover({
         }
       }
       
-      // Re-apply terrain if enabled
       if (terrainEnabled && isViewportInCatanduanes(map)) {
         try {
           map.setTerrain({
@@ -387,18 +389,18 @@ export default function Discover({
   // Filter models by category
   const categoryFilteredModels = useMemo(() => {
     if (!selectedCategory) {
-      return touristSpotModels // Show all if no category selected
+      return touristSpotModels
     }
     
     return touristSpotModels.filter(model => {
       if (!model.categories || model.categories.length === 0) {
-        return false // Don't show spots without categories when filtering
+        return false
       }
       return model.categories.includes(selectedCategory)
     })
   }, [selectedCategory])
 
-  // Initialize the map
+  // Initialize the map - REMOVED categoryFilteredModels from dependencies to prevent flickering
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
@@ -469,8 +471,7 @@ export default function Discover({
           const clickedLng = e.lngLat.lng
           const clickedLat = e.lngLat.lat
           
-          // Only check category-filtered models
-          for (const model of categoryFilteredModels) {
+          for (const model of touristSpotModels) {
             const distance = calculateDistanceDegrees(
               [clickedLng, clickedLat],
               model.coordinates
@@ -484,7 +485,6 @@ export default function Discover({
               const altitudeAdjustment = modelAltitude > 20 ? 0.3 : 0
               const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
-              // Use the proper padding calculation that accounts for itinerary state
               const padding = isSidebarOpen && !isMobile ? getPaddingForSidebar() : { left: 0, right: 0, top: 0, bottom: 0 }
 
               mapInstance.flyTo({
@@ -786,7 +786,7 @@ export default function Discover({
         eventHandlersRef.current = {}
       }
     }
-  }, [categoryFilteredModels]) // Add dependency
+  }, []) // FIXED: Empty dependency array prevents re-initialization
 
   // Update terrain when terrainEnabled changes
   useEffect(() => {
@@ -838,7 +838,37 @@ export default function Discover({
 
   const activeMarkersGeocode = selectedMunicipalityGeocode || selectedPlaceMunicipalityGeocode
 
-  // Filter by both municipality AND category
+  // Filter tourist spots from GeoJSON by category and municipality
+  const filteredTouristSpots = useMemo(() => {
+    let filtered = allTouristSpots
+
+    // Filter by category if selected
+    if (selectedCategory) {
+      filtered = filtered.filter(spot => spot.category === selectedCategory)
+    }
+
+    // Filter by municipality if selected
+    if (activeMarkersGeocode && municipalityGeoJson) {
+      const municipalityFeatures = municipalityGeoJson.features.filter(
+        (feature) => {
+          const geocode = feature.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
+          return geocode === activeMarkersGeocode
+        }
+      )
+
+      if (municipalityFeatures.length > 0) {
+        filtered = filtered.filter((spot) => {
+          return municipalityFeatures.some((feature) => {
+            return isPointInGeoJSONFeature(spot.coordinates, feature)
+          })
+        })
+      }
+    }
+
+    return filtered
+  }, [allTouristSpots, selectedCategory, activeMarkersGeocode, municipalityGeoJson])
+  
+  // Filter 3D models by municipality
   const filteredModels = useMemo(() => {
     if (!activeMarkersGeocode || !municipalityGeoJson) {
       return []
@@ -855,7 +885,6 @@ export default function Discover({
       return []
     }
 
-    // First filter by municipality
     let filtered = categoryFilteredModels.filter((model) => {
       return municipalityFeatures.some((feature) => {
         return isPointInGeoJSONFeature(model.coordinates, feature)
@@ -867,11 +896,11 @@ export default function Discover({
   
   // Show toast notification when municipality is selected
   useEffect(() => {
-    if (selectedMunicipalityGeocode && filteredModels.length > 0) {
+    if (selectedMunicipalityGeocode && (filteredModels.length > 0 || filteredTouristSpots.length > 0)) {
       const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
-      const spotCount = filteredModels.length
+      const totalCount = filteredModels.length + filteredTouristSpots.length
       toast.success(
-        `Showing ${spotCount} attraction${spotCount === 1 ? '' : 's'} in ${municipalityName}`,
+        `Showing ${totalCount} attraction${totalCount === 1 ? '' : 's'} in ${municipalityName}`,
         {
           duration: 3000,
           icon: '📍',
@@ -883,14 +912,15 @@ export default function Discover({
         }
       )
     }
-  }, [selectedMunicipalityGeocode, filteredModels.length])
+  }, [selectedMunicipalityGeocode, filteredModels.length, filteredTouristSpots.length])
 
   useMap3DMarkers(map, filteredModels, (modelId) => {
     setSelectedTouristSpot(modelId)
     setIsTooltipVisible(false)
   }, [45, 25], 0)
 
-  usePlaceMarkers(map, activeMarkersGeocode, handlePlaceClick, handlePlaceHover)
+  // Use filteredTouristSpots instead of relying on usePlaceMarkers
+  usePlaceMarkers(map, activeMarkersGeocode, handlePlaceClick, handlePlaceHover, filteredTouristSpots)
 
   useEffect(() => {
     if (!map || !mapContainer.current) return
@@ -933,7 +963,7 @@ export default function Discover({
         onClose={() => setIsMapStyleOpen(false)}
       />
 
-      {/* Map Controls (Map Style Toggle, Current Location, Reset Camera) */}
+      {/* Map Controls */}
       <MapControls 
         onResetCamera={handleResetCamera}
         onToggleMapStyle={handleToggleMapStyle}
