@@ -829,8 +829,8 @@ export default function Discover({
     }
   }, [map, terrainEnabled])
 
-  // Pass category-filtered models to 3D rendering
-  useMap3DModels(modelsEnabled ? map : null, categoryFilteredModels)
+  // Pass category-filtered models to 3D rendering (always call hook, let it handle modelsEnabled internally)
+  useMap3DModels(map, categoryFilteredModels, modelsEnabled)
 
   useEffect(() => {
     selectedMunicipalityRef.current = selectedMunicipalityGeocode
