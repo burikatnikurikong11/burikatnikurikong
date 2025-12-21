@@ -1,8 +1,7 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
-
 /**
  * Web Vitals Performance Monitoring
  * Reports Core Web Vitals metrics for performance tracking
+ * Compatible with web-vitals v5+
  */
 
 interface Metric {
@@ -51,21 +50,28 @@ function sendToAnalytics(metric: Metric) {
 export function reportWebVitals(onPerfEntry?: (metric: Metric) => void) {
   const callback = onPerfEntry || sendToAnalytics;
 
-  // Cumulative Layout Shift (CLS) - visual stability
-  onCLS(callback);
-  
-  // First Input Delay (FID) - interactivity
-  onFID(callback);
-  
-  // First Contentful Paint (FCP) - loading performance
-  onFCP(callback);
-  
-  // Largest Contentful Paint (LCP) - loading performance
-  onLCP(callback);
-  
-  // Time to First Byte (TTFB) - server response time
-  onTTFB(callback);
+  // Dynamically import web-vitals to handle compatibility issues
+  import('web-vitals')
+    .then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
+      // Cumulative Layout Shift (CLS) - visual stability
+      onCLS(callback);
+      
+      // Interaction to Next Paint (INP) - replaces FID in v5
+      onINP(callback);
+      
+      // First Contentful Paint (FCP) - loading performance
+      onFCP(callback);
+      
+      // Largest Contentful Paint (LCP) - loading performance
+      onLCP(callback);
+      
+      // Time to First Byte (TTFB) - server response time
+      onTTFB(callback);
+    })
+    .catch((error) => {
+      // Gracefully handle if web-vitals is not available
+      if (import.meta.env.DEV) {
+        console.warn('Web Vitals could not be loaded:', error);
+      }
+    });
 }
-
-// Export individual metric reporters for custom usage
-export { onCLS, onFID, onFCP, onLCP, onTTFB };

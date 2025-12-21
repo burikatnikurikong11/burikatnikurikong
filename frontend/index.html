@@ -18,37 +18,16 @@
 
     <!-- Preload critical resources -->
     <link rel="modulepreload" href="/src/main.tsx">
-    <link rel="preload" href="/CATANDUANES.geojson" as="fetch" type="application/json" crossorigin>
     
-    <!-- Preload critical fonts (if you have custom fonts) -->
-    <!-- <link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin> -->
-
-    <!-- PWA support -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.webmanifest">
+    <!-- PWA support - only include if manifest exists -->
+    <!-- <link rel="apple-touch-icon" href="/apple-touch-icon.png"> -->
+    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
 
     <!-- Performance hint: prefetch likely next pages -->
-    <link rel="prefetch" href="/discover">
+    <!-- <link rel="prefetch" href="/discover"> -->
 </head>
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Optional: Add structured data for SEO -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "HapiHub",
-      "description": "Tourism and travel planning application for Catanduanes",
-      "applicationCategory": "TravelApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
 </body>
 </html>

@@ -20,30 +20,12 @@ export default defineConfig({
       threshold: 1024,
       deleteOriginFile: false
     }),
-    // PWA with service worker
+    // PWA with service worker (disabled by default, enable when ready)
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      manifest: {
-        name: 'HapiHub - Catanduanes Tourism',
-        short_name: 'HapiHub',
-        description: 'Explore Catanduanes with immersive 3D maps and intelligent travel planning',
-        theme_color: '#10b981',
-        background_color: '#ffffff',
-        display: 'standalone',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      },
+      injectRegister: 'auto',
+      includeAssets: ['favicon.ico', 'robots.txt'],
+      manifest: false, // Disable manifest until icons are ready
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
         runtimeCaching: [
@@ -82,20 +64,11 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
             }
-          },
-          {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5 // 5 minutes
-              },
-              networkTimeoutSeconds: 10
-            }
           }
         ]
+      },
+      devOptions: {
+        enabled: false // Disable in development to avoid issues
       }
     })
   ],
@@ -147,17 +120,14 @@ export default defineConfig({
     cssCodeSplit: true,
     sourcemap: false,
     reportCompressedSize: false,
-    // Enable CSS minification
     cssMinify: true
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'maplibre-gl', 'three', 'zustand'],
-    exclude: [],
+    exclude: ['web-vitals'],
     esbuildOptions: {
-      // Drop console logs in dependencies too
-      drop: ['console', 'debugger'],
+      drop: import.meta.env.PROD ? ['console', 'debugger'] : [],
     }
   },
-  // Enable caching
   cacheDir: 'node_modules/.vite',
 })
