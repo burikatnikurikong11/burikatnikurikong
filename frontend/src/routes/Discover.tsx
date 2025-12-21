@@ -13,6 +13,7 @@ import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
 import MapControls from '../components/MapControls'
+import MapStyleSwitcher from '../components/MapStyleSwitcher'
 import CategoryPills from '../components/CategoryPills'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
@@ -20,6 +21,8 @@ import toast from 'react-hot-toast'
 import { matchPlaceToModel } from '../utils/matchPlaceToModel'
 import type { PlaceInfo as PlaceInfoType } from '../types/api'
 import type { Place } from '../types/place'
+
+type MapStyle = 'satellite' | 'standard' | 'transport'
 
 interface DiscoverProps {
   isSidebarOpen?: boolean
@@ -45,6 +48,7 @@ export default function Discover({
   const [hoveredPlace, setHoveredPlace] = useState<Place | null>(null)
   const [selectedPlaceMunicipalityGeocode, setSelectedPlaceMunicipalityGeocode] = useState<string | null>(null)
   const selectedMunicipalityRef = useRef<string | null>(null)
+  const [mapStyle, setMapStyle] = useState<MapStyle>('satellite')
   
   // Category filter state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -130,6 +134,94 @@ export default function Discover({
       essential: true
     })
   }, [map, setSelectedTouristSpot])
+
+  // Handle map style change
+  const handleMapStyleChange = useCallback((newStyle: MapStyle) => {
+    if (!map) return
+    
+    setMapStyle(newStyle)
+    const apiKey = getMapTilerKey()
+    
+    let styleUrl = ''
+    switch (newStyle) {
+      case 'satellite':
+        styleUrl = `https://api.maptiler.com/maps/satellite/style.json?key=${apiKey}`
+        break
+      case 'standard':
+        styleUrl = `https://api.maptiler.com/maps/streets-v2/style.json?key=${apiKey}`
+        break
+      case 'transport':
+        // Using basic-v2 as transport style (placeholder until you have a custom transport style)
+        styleUrl = `https://api.maptiler.com/maps/basic-v2/style.json?key=${apiKey}`
+        break
+    }
+    
+    map.setStyle(styleUrl)
+    
+    // Re-add sources and layers after style change
+    map.once('style.load', () => {
+      if (!map) return
+      
+      // Re-add terrain source
+      if (!map.getSource('terrainSource')) {
+        map.addSource('terrainSource', {
+          type: 'raster-dem',
+          url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${apiKey}`,
+          tileSize: 256,
+          maxzoom: 14
+        })
+      }
+      
+      // Re-add province boundaries if we have them
+      if (municipalityGeoJson && !map.getSource('provinceBoundaries')) {
+        map.addSource('provinceBoundaries', {
+          type: 'geojson',
+          data: municipalityGeoJson
+        })
+        
+        const layers = map.getStyle().layers
+        const firstSymbolLayerId = layers?.find(layer => layer.type === 'symbol')?.id
+
+        if (!map.getLayer('provinceHoverLayer')) {
+          map.addLayer({
+            id: 'provinceHoverLayer',
+            type: 'fill',
+            source: 'provinceBoundaries',
+            paint: {
+              'fill-color': 'transparent',
+              'fill-opacity': 0
+            }
+          }, firstSymbolLayerId)
+        }
+
+        if (!map.getLayer('provinceBordersLayer')) {
+          map.addLayer({
+            id: 'provinceBordersLayer',
+            type: 'line',
+            source: 'provinceBoundaries',
+            paint: {
+              'line-color': '#ffffff',
+              'line-width': 2,
+              'line-opacity': 0
+            },
+            filter: ['==', 'GEOCODE', '']
+          }, firstSymbolLayerId)
+        }
+      }
+      
+      // Re-apply terrain if enabled
+      if (terrainEnabled && isViewportInCatanduanes(map)) {
+        try {
+          map.setTerrain({
+            source: 'terrainSource',
+            exaggeration: MAP_CONFIG.TERRAIN_EXAGGERATION
+          })
+        } catch (error) {
+          // Terrain source might not be ready yet
+        }
+      }
+    })
+  }, [map, municipalityGeoJson, terrainEnabled])
 
   // Handle place selection and zoom
   const handlePlaceClick = useCallback((place: Place) => {
@@ -763,7 +855,14 @@ export default function Discover({
         isItineraryExpanded={isItineraryExpanded}
       />
 
-      {/* Map Controls (Map Style, Current Location, Reset Camera) */}
+      {/* Map Style Switcher */}
+      <MapStyleSwitcher 
+        currentStyle={mapStyle}
+        onStyleChange={handleMapStyleChange}
+        isMobile={isMobile}
+      />
+
+      {/* Map Controls (Current Location, Reset Camera) */}
       <MapControls 
         onResetCamera={handleResetCamera}
         isSidebarOpen={isSidebarOpen}
