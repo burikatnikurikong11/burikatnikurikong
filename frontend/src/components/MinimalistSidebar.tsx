@@ -37,9 +37,9 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         style={{
-          top: '8px',
-          left: '8px',
-          height: 'calc(100vh - 16px)',
+          top: '4px',
+          left: '4px',
+          height: 'calc(100vh - 8px)',
           width: isSidebarExpanded ? '280px' : '72px',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
@@ -277,11 +277,11 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           isSearchPanelOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
         }`}
         style={{
-          top: '8px',
-          left: isSidebarExpanded ? 'calc(280px + 24px)' : 'calc(72px + 24px)',
-          height: 'calc(100vh - 16px)',
+          top: '4px',
+          left: isSidebarExpanded ? 'calc(280px + 12px)' : 'calc(72px + 12px)',
+          height: 'calc(100vh - 8px)',
           width: '420px',
-          maxWidth: 'calc(100vw - 104px)',
+          maxWidth: 'calc(100vw - 92px)',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
