@@ -76,14 +76,17 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     // Calculate sidebar width (30% of window width)
     const sidebarWidthPercent = 30
     const windowWidth = window.innerWidth
+    const windowHeight = window.innerHeight
     const sidebarWidth = (windowWidth * sidebarWidthPercent) / 100
     
-    // Add padding on the left to shift center point to the visible area
+    // Add padding to center the marker in the visible area
+    // Left padding: shift center to account for sidebar
+    // Bottom padding: shift center up to account for info card at bottom
     return {
       left: sidebarWidth / 2, // Half of sidebar width to center in visible area
       right: 0,
       top: 0,
-      bottom: 0
+      bottom: windowHeight * 0.15 // Add bottom padding to shift marker up (15% of viewport height)
     }
   }, [map, isMobile, isSidebarOpen])
   
@@ -341,12 +344,12 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
               // Center on model coordinates with fixed 45-degree pitch
-              // Add padding to account for sidebar
+              // Add padding to account for sidebar and info card
               const padding = isSidebarOpen && !isMobile ? {
                 left: (window.innerWidth * 30) / 100 / 2,
                 right: 0,
                 top: 0,
-                bottom: 0
+                bottom: window.innerHeight * 0.15
               } : { left: 0, right: 0, top: 0, bottom: 0 }
 
               mapInstance.flyTo({
