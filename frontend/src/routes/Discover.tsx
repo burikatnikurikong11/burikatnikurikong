@@ -753,6 +753,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         selectedCategory={selectedCategory}
         onCategorySelect={handleCategorySelect}
         isMobile={isMobile}
+        isSidebarOpen={isSidebarOpen}
       />
 
       {/* Map Controls (Map Style, Current Location, Reset Camera) */}
