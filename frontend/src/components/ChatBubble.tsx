@@ -22,12 +22,6 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const isInitialMount = useRef(true)
-
-  useEffect(() => {
-    // Mark that initial mount is complete
-    isInitialMount.current = false
-  }, [])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -71,15 +65,11 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
 
       setMessages(prev => [...prev, assistantMessage])
       
-      // Automatically trigger place selection if AI returns places
-      // This will fly to the model and show the info card
       if (response.places && response.places.length > 0 && onPlaceSelect) {
-        // Use a small delay to ensure the message is rendered first
         setTimeout(() => {
-          // Select the first place that matches a model
           for (const place of response.places) {
             onPlaceSelect(place)
-            break // Only select the first matching place
+            break
           }
         }, 500)
       }
@@ -120,73 +110,66 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
     return icons[type] || '📍'
   }
 
-  // Mobile: bottom sheet, Desktop: left sidebar
+  // Mobile: bottom sheet
   if (isMobile) {
     return (
       <>
+        {/* Overlay backdrop */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-[9997] transition-opacity duration-300"
+            onClick={onToggle}
+          />
+        )}
+
         {/* Mobile Bottom Sheet */}
         <div
-          className={`fixed left-0 right-0 z-[9998] ${
-            isInitialMount.current ? '' : 'transition-all duration-300 ease-in-out'
+          className={`fixed left-0 right-0 z-[9998] transition-all duration-300 ease-in-out ${
+            isOpen ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{
-            bottom: isOpen ? '0' : '-100%',
-            height: isOpen ? '60%' : '0%',
-            backgroundColor: 'var(--forest-green)',
-            borderTop: isOpen ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
-            borderTopLeftRadius: isOpen ? '1rem' : '0',
-            borderTopRightRadius: isOpen ? '1rem' : '0',
-            boxShadow: isOpen ? '0 -4px 12px rgba(0, 0, 0, 0.3)' : 'none',
-            overflow: 'hidden'
+            bottom: 0,
+            height: '70%',
+            maxHeight: '600px',
+            backgroundColor: '#ffffff',
+            borderTopLeftRadius: '1.5rem',
+            borderTopRightRadius: '1.5rem',
+            boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)'
           }}
         >
           {/* Drag Handle */}
-          {isOpen && (
-            <div className="w-full flex justify-center py-2 cursor-grab active:cursor-grabbing" onClick={onToggle}>
-              <div className="w-12 h-1 rounded-full" style={{ backgroundColor: 'var(--gray)' }}></div>
-            </div>
-          )}
+          <div className="w-full flex justify-center py-3 cursor-pointer" onClick={onToggle}>
+            <div className="w-12 h-1.5 rounded-full bg-gray-300"></div>
+          </div>
           
-          {/* Sidebar Content */}
-          <div className={`h-full flex flex-col ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} style={{ height: isOpen ? 'calc(100% - 24px)' : '0' }}>
+          {/* Chat Content */}
+          <div className="h-full flex flex-col" style={{ height: 'calc(100% - 30px)' }}>
             {/* Header */}
-            <div
-              className="px-4 py-4 flex items-center justify-between flex-shrink-0"
-              style={{
-                backgroundColor: 'var(--forest-green)',
-                borderBottom: 'none'
-              }}
-            >
+            <div className="px-5 py-4 flex items-center justify-between flex-shrink-0 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--sunset-gold)' }}
-                >
-                  <span className="text-xl">💬</span>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-white">HapiHub AI</h3>
-                  <p className="text-xs text-white/80">Travel Assistant</p>
+                  <h3 className="font-bold text-base text-gray-900">HapiHub AI</h3>
+                  <p className="text-xs text-gray-500">Travel Assistant</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onToggle}
-                  className="p-2 rounded-lg transition-colors text-white hover:bg-white/20"
-                  aria-label="Close sidebar"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                onClick={onToggle}
+                className="p-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"
+                aria-label="Close chat"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            {/* Messages - reuse the same component structure */}
-            <div
-              className="flex-1 overflow-y-auto p-4 space-y-4 sidebar-scrollbar"
-              style={{ backgroundColor: '#f9fafb' }}
-            >
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -194,64 +177,30 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
                 >
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
-                      message.role === 'user' ? 'ml-auto' : ''
+                      message.role === 'user' 
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white' 
+                        : 'bg-white text-gray-900 border border-gray-200'
                     }`}
-                    style={
-                      message.role === 'user'
-                        ? {
-                            backgroundColor: 'var(--forest-green)',
-                            color: '#ffffff'
-                          }
-                        : {
-                            backgroundColor: '#ffffff',
-                            color: '#1f2937',
-                            border: '1px solid #e5e7eb'
-                          }
-                    }
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     
-                    {/* Places */}
                     {message.places && message.places.length > 0 && (
-                      <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid #e5e7eb' }}>
-                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--gray)' }}>
+                      <div className="mt-3 pt-3 space-y-2 border-t border-gray-200">
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-gray-600">
                           📍 Related Places
                         </p>
                         {message.places.map((place, idx) => (
                           <button
                             key={idx}
                             onClick={() => handlePlaceClick(place)}
-                            className="w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 group hover:shadow-md"
-                            style={{
-                              backgroundColor: '#f9fafb',
-                              border: '2px solid #e5e7eb'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#ffffff'
-                              e.currentTarget.style.borderColor = 'var(--ocean-blue)'
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f9fafb'
-                              e.currentTarget.style.borderColor = '#e5e7eb'
-                            }}
+                            className="w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 bg-gray-50 border-2 border-gray-200 hover:bg-white hover:border-orange-400 hover:shadow-md"
                           >
                             <span className="text-xl">{getPlaceIcon(place.type)}</span>
                             <div className="flex-1 min-w-0">
-                              <p
-                                className="text-sm font-semibold truncate"
-                                style={{ color: '#1f2937' }}
-                              >
-                                {place.name}
-                              </p>
-                              <p className="text-xs capitalize" style={{ color: 'var(--gray)' }}>{place.type}</p>
+                              <p className="text-sm font-semibold truncate text-gray-900">{place.name}</p>
+                              <p className="text-xs capitalize text-gray-500">{place.type}</p>
                             </div>
-                            <svg
-                              className="w-5 h-5 transition-colors flex-shrink-0"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              style={{ color: 'var(--ocean-blue)' }}
-                            >
+                            <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -260,36 +209,23 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
                       </div>
                     )}
                     
-                    <p
-                      className="text-xs mt-2"
-                      style={{
-                        color: message.role === 'user' ? 'rgba(255, 255, 255, 0.7)' : 'var(--gray)'
-                      }}
-                    >
+                    <p className={`text-xs mt-2 ${message.role === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
               ))}
 
-              {/* Loading indicator */}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div
-                    className="rounded-2xl px-4 py-3 shadow-sm"
-                    style={{
-                      backgroundColor: '#ffffff',
-                      color: '#1f2937',
-                      border: '1px solid #e5e7eb'
-                    }}
-                  >
+                  <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-200">
                     <div className="flex items-center gap-3">
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--forest-green)', animationDelay: '0ms' }}></span>
-                        <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--sunset-gold)', animationDelay: '150ms' }}></span>
-                        <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--ocean-blue)', animationDelay: '300ms' }}></span>
+                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 rounded-full bg-orange-600 animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
-                      <span className="text-sm font-medium" style={{ color: 'var(--gray)' }}>HapiHub is thinking...</span>
+                      <span className="text-sm font-medium text-gray-600">Thinking...</span>
                     </div>
                   </div>
                 </div>
@@ -299,59 +235,25 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
             </div>
 
             {/* Input */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 flex-shrink-0"
-              style={{
-                backgroundColor: 'var(--forest-green)',
-                borderTop: 'none'
-              }}
-            >
-              <div
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 shadow-sm"
-                style={{
-                  backgroundColor: '#f9fafb',
-                  border: '2px solid #e5e7eb'
-                }}
-              >
+            <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-3 rounded-2xl px-4 py-3 bg-gray-50 border-2 border-gray-200 focus-within:border-orange-400 transition-colors">
                 <input
                   ref={inputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about Catanduanes..."
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
-                  style={{
-                    color: '#1f2937'
-                  }}
+                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400 text-gray-900"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="p-2 rounded-xl transition-all"
-                  style={
+                  className={`p-2 rounded-xl transition-all ${
                     input.trim() && !isLoading
-                      ? {
-                          backgroundColor: 'var(--forest-green)',
-                          color: '#ffffff'
-                        }
-                      : {
-                          backgroundColor: '#e5e7eb',
-                          color: '#9ca3af',
-                          cursor: 'not-allowed'
-                        }
-                  }
-                  onMouseEnter={(e) => {
-                    if (input.trim() && !isLoading) {
-                      e.currentTarget.style.transform = 'scale(1.05)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (input.trim() && !isLoading) {
-                      e.currentTarget.style.transform = 'scale(1)'
-                    }
-                  }}
+                      ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-105'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -362,15 +264,11 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
           </div>
         </div>
 
-        {/* Mobile: Floating button to open bottom sheet */}
+        {/* Floating Button */}
         {!isOpen && (
           <button
             onClick={onToggle}
-            className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110"
-            style={{
-              backgroundColor: 'var(--forest-green)',
-              color: '#ffffff'
-            }}
+            className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 bg-gradient-to-br from-orange-500 to-orange-600"
             aria-label="Open HapiHub AI chat"
           >
             <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -382,62 +280,53 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
     )
   }
 
-  // Desktop: Left Sidebar (changed from right)
+  // Desktop: Floating Card in Lower Right Corner
   return (
-    <div
-      className={`h-full flex-shrink-0 ${
-        isInitialMount.current ? '' : 'transition-all duration-300 ease-in-out'
-      } ${isOpen ? 'rounded-xl' : ''}`}
-      style={{
-        width: isOpen ? 'calc(30% - 0.125rem)' : '0%',
-        backgroundColor: 'var(--forest-green)',
-        borderRight: isOpen ? '1px solid #e5e7eb' : 'none', // Changed from borderLeft to borderRight
-        boxShadow: isOpen ? '4px 0 12px rgba(0, 0, 0, 0.1)' : 'none', // Changed shadow direction
-        overflow: isOpen ? 'hidden' : 'hidden',
-        minWidth: isOpen ? '350px' : '0px',
-        maxWidth: isOpen ? '450px' : '0px'
-      }}
-    >
-      {/* Sidebar Content */}
-      <div className={`h-full flex flex-col ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+    <>
+      {/* Floating Chat Card */}
+      <div
+        className={`fixed z-[9998] transition-all duration-300 ease-in-out ${
+          isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'
+        }`}
+        style={{
+          bottom: '5.5rem',
+          right: '1.5rem',
+          width: '380px',
+          maxWidth: 'calc(100vw - 3rem)',
+          height: '600px',
+          maxHeight: 'calc(100vh - 10rem)',
+          backgroundColor: '#ffffff',
+          borderRadius: '1rem',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          overflow: 'hidden'
+        }}
+      >
         {/* Header */}
-        <div
-          className="px-4 py-4 flex items-center justify-between"
-          style={{
-            backgroundColor: 'var(--forest-green)',
-            borderBottom: 'none'
-          }}
-        >
+        <div className="px-5 py-4 flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white">
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: 'var(--sunset-gold)' }}
-            >
-              <span className="text-xl">💬</span>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
             </div>
             <div>
-              <h3 className="font-bold text-base text-white">HapiHub AI</h3>
-              <p className="text-xs text-white/80">Travel Assistant</p>
+              <h3 className="font-bold text-base text-gray-900">HapiHub AI</h3>
+              <p className="text-xs text-gray-500">Travel Assistant</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onToggle}
-              className="p-2 rounded-lg transition-colors text-white hover:bg-white/20"
-              aria-label="Close sidebar"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"
+            aria-label="Close chat"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Messages */}
-        <div
-          className="flex-1 overflow-y-auto p-4 space-y-4 sidebar-scrollbar"
-          style={{ backgroundColor: '#f9fafb' }}
-        >
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50" style={{ height: 'calc(100% - 140px)' }}>
           {messages.map((message) => (
             <div
               key={message.id}
@@ -445,64 +334,30 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
             >
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
-                  message.role === 'user' ? 'ml-auto' : ''
+                  message.role === 'user' 
+                    ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white' 
+                    : 'bg-white text-gray-900 border border-gray-200'
                 }`}
-                style={
-                  message.role === 'user'
-                    ? {
-                        backgroundColor: 'var(--forest-green)',
-                        color: '#ffffff'
-                      }
-                    : {
-                        backgroundColor: '#ffffff',
-                        color: '#1f2937',
-                        border: '1px solid #e5e7eb'
-                      }
-                }
               >
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 
-                {/* Places */}
                 {message.places && message.places.length > 0 && (
-                  <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid #e5e7eb' }}>
-                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--gray)' }}>
+                  <div className="mt-3 pt-3 space-y-2 border-t border-gray-200">
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-gray-600">
                       📍 Related Places
                     </p>
                     {message.places.map((place, idx) => (
                       <button
                         key={idx}
                         onClick={() => handlePlaceClick(place)}
-                        className="w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 group hover:shadow-md"
-                        style={{
-                          backgroundColor: '#f9fafb',
-                          border: '2px solid #e5e7eb'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#ffffff'
-                          e.currentTarget.style.borderColor = 'var(--ocean-blue)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#f9fafb'
-                          e.currentTarget.style.borderColor = '#e5e7eb'
-                        }}
+                        className="w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 bg-gray-50 border-2 border-gray-200 hover:bg-white hover:border-orange-400 hover:shadow-md"
                       >
                         <span className="text-xl">{getPlaceIcon(place.type)}</span>
                         <div className="flex-1 min-w-0">
-                          <p
-                            className="text-sm font-semibold truncate"
-                            style={{ color: '#1f2937' }}
-                          >
-                            {place.name}
-                          </p>
-                          <p className="text-xs capitalize" style={{ color: 'var(--gray)' }}>{place.type}</p>
+                          <p className="text-sm font-semibold truncate text-gray-900">{place.name}</p>
+                          <p className="text-xs capitalize text-gray-500">{place.type}</p>
                         </div>
-                        <svg
-                          className="w-5 h-5 transition-colors flex-shrink-0"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          style={{ color: 'var(--ocean-blue)' }}
-                        >
+                        <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -510,37 +365,24 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
                     ))}
                   </div>
                 )}
-
-                <p
-                  className="text-xs mt-2"
-                  style={{
-                    color: message.role === 'user' ? 'rgba(255, 255, 255, 0.7)' : 'var(--gray)'
-                  }}
-                >
+                
+                <p className={`text-xs mt-2 ${message.role === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
           ))}
 
-          {/* Loading indicator */}
           {isLoading && (
             <div className="flex justify-start">
-              <div
-                className="rounded-2xl px-4 py-3 shadow-sm"
-                style={{
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
-                  border: '1px solid #e5e7eb'
-                }}
-              >
+              <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--forest-green)', animationDelay: '0ms' }}></span>
-                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--sunset-gold)', animationDelay: '150ms' }}></span>
-                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--ocean-blue)', animationDelay: '300ms' }}></span>
+                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 rounded-full bg-orange-600 animate-bounce" style={{ animationDelay: '300ms' }}></span>
                   </div>
-                  <span className="text-sm font-medium" style={{ color: 'var(--gray)' }}>HapiHub is thinking...</span>
+                  <span className="text-sm font-medium text-gray-600">Thinking...</span>
                 </div>
               </div>
             </div>
@@ -550,59 +392,25 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
         </div>
 
         {/* Input */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-4"
-          style={{
-            backgroundColor: 'var(--forest-green)',
-            borderTop: 'none'
-          }}
-        >
-          <div
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 shadow-sm"
-            style={{
-              backgroundColor: '#f9fafb',
-              border: '2px solid #e5e7eb'
-            }}
-          >
+        <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-100">
+          <div className="flex items-center gap-3 rounded-2xl px-4 py-3 bg-gray-50 border-2 border-gray-200 focus-within:border-orange-400 transition-colors">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about Catanduanes..."
-              className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
-              style={{
-                color: '#1f2937'
-              }}
+              className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400 text-gray-900"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="p-2 rounded-xl transition-all"
-              style={
+              className={`p-2 rounded-xl transition-all ${
                 input.trim() && !isLoading
-                  ? {
-                      backgroundColor: 'var(--forest-green)',
-                      color: '#ffffff'
-                    }
-                  : {
-                      backgroundColor: '#e5e7eb',
-                      color: '#9ca3af',
-                      cursor: 'not-allowed'
-                    }
-              }
-              onMouseEnter={(e) => {
-                if (input.trim() && !isLoading) {
-                  e.currentTarget.style.transform = 'scale(1.05)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (input.trim() && !isLoading) {
-                  e.currentTarget.style.transform = 'scale(1)'
-                }
-              }}
+                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-105'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -611,7 +419,20 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
           </div>
         </form>
       </div>
-    </div>
+
+      {/* Floating Button */}
+      {!isOpen && (
+        <button
+          onClick={onToggle}
+          className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 bg-gradient-to-br from-orange-500 to-orange-600"
+          aria-label="Open HapiHub AI chat"
+        >
+          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      )}
+    </>
   )
 }
 
