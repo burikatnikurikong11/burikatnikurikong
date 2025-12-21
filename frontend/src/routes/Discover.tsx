@@ -41,6 +41,7 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   // Municipality tooltip state
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isTooltipVisible, setIsTooltipVisible] = useState(true) // Add visibility state
   
   // Store event handlers for cleanup
   const eventHandlersRef = useRef<{
@@ -68,6 +69,8 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
     setSelectedTouristSpot(null)
+    // Re-enable tooltip when closing info panel
+    setIsTooltipVisible(true)
   }, [setSelectedTouristSpot])
 
   // Handle reset camera to initial view
@@ -79,6 +82,8 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     setSelectedPlace(null)
     setSelectedPlaceMunicipalityGeocode(null)
     selectedMunicipalityRef.current = null
+    // Re-enable tooltip when resetting
+    setIsTooltipVisible(true)
 
     map.flyTo({
       center: MAP_CONFIG.DEFAULT_CENTER,
@@ -101,6 +106,8 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     if (!map) return
 
     setSelectedPlace(place)
+    // Hide tooltip when a place is selected
+    setIsTooltipVisible(false)
 
     // Find and store the geocode for this place's municipality
     const municipalityName = place.municipality.toUpperCase().replace(/\s+/g, '_')
@@ -126,12 +133,23 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   // Handle place hover
   const handlePlaceHover = useCallback((place: Place | null) => {
     setHoveredPlace(place)
-  }, [])
+    // Hide tooltip when hovering over a place marker
+    if (place) {
+      setIsTooltipVisible(false)
+    } else {
+      // Only show tooltip again if no selections are active
+      if (!selectedPlace && !selectedTouristSpot && !selectedMunicipalityGeocode) {
+        setIsTooltipVisible(true)
+      }
+    }
+  }, [selectedPlace, selectedTouristSpot, selectedMunicipalityGeocode])
 
   // Handle closing place info
   const handleClosePlaceInfo = useCallback(() => {
     setSelectedPlace(null)
     setHoveredPlace(null)
+    // Re-enable tooltip when closing place info
+    setIsTooltipVisible(true)
   }, [])
 
   // Handle place selection from AI chatbot
@@ -153,6 +171,8 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     
     // Select the model (this will show the info card)
     setSelectedTouristSpot(modelId)
+    // Hide tooltip when a tourist spot is selected
+    setIsTooltipVisible(false)
     
     // Calculate marker coordinates with the same offset as markers use
     // This matches the marker click animation behavior exactly
@@ -191,6 +211,17 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     }
   }, [onPlaceSelectFromAI, handlePlaceFromAI])
   
+  // Hide tooltip when a tourist spot is selected
+  useEffect(() => {
+    if (selectedTouristSpot) {
+      setIsTooltipVisible(false)
+    } else {
+      // Only show tooltip if no other selections are active
+      if (!selectedPlace && !selectedMunicipalityGeocode) {
+        setIsTooltipVisible(true)
+      }
+    }
+  }, [selectedTouristSpot, selectedPlace, selectedMunicipalityGeocode])
 
   // Initialize the map
   useEffect(() => {
@@ -280,6 +311,8 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
             // If click is within threshold distance, consider it a hit
             if (distance < MAP_CONFIG.MODEL_CLICK_THRESHOLD && mapInstance) {
               setSelectedTouristSpot(model.id)
+              // Hide tooltip when a model is clicked
+              setIsTooltipVisible(false)
               // Fly to marker with 45-degree angle, centered on the model
               // Adjust zoom based on model scale and altitude for optimal visibility
               const modelScale = model.scale ?? MODEL_CONFIG.DEFAULT_SCALE
@@ -449,10 +482,12 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
               mapInstance.setPaintProperty('provinceBordersLayer', 'line-opacity', 1)
               mapInstance.getCanvas().style.cursor = 'pointer'
               
-              // Show tooltip with municipality name
-              const municipalityName = MUNICIPALITY_NAMES[geocode]
-              if (municipalityName) {
-                setHoveredMunicipalityName(municipalityName)
+              // Show tooltip with municipality name (only if tooltip is visible)
+              if (isTooltipVisible) {
+                const municipalityName = MUNICIPALITY_NAMES[geocode]
+                if (municipalityName) {
+                  setHoveredMunicipalityName(municipalityName)
+                }
               }
             }
 
@@ -542,6 +577,7 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
                   updateBordersForSelection()
                   // Hide tooltip when clicked
                   setHoveredMunicipalityName(null)
+                  setIsTooltipVisible(false)
                 }
               }
             }
@@ -765,7 +801,11 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   // Parameters: (map, models, onClick, [metersNorth, metersEast], verticalPixelOffset)
   // Using 0 vertical offset so marker position is independent of camera zoom/angle
   // Only show markers when a municipality is selected
-  useMap3DMarkers(map, filteredModels, setSelectedTouristSpot, [45, 25], 0)
+  useMap3DMarkers(map, filteredModels, (modelId) => {
+    setSelectedTouristSpot(modelId)
+    // Hide tooltip when a marker is clicked
+    setIsTooltipVisible(false)
+  }, [45, 25], 0)
 
   // Add place markers from GeoJSON files
   // Only show place markers when a municipality is selected or a place card is open
@@ -828,11 +868,12 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
         </div>
       )}
       
-      {/* Municipality Tooltip (Europa Universalis IV-style) */}
+      {/* Municipality Tooltip (Europa Universalis IV-style) - now with visibility control */}
       <MunicipalityTooltip 
         municipalityName={hoveredMunicipalityName}
         mouseX={mousePosition.x}
         mouseY={mousePosition.y}
+        isVisible={isTooltipVisible}
       />
 
       {/* Tourist Spot Info Panel */}
