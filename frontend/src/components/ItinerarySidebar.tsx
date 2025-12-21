@@ -17,19 +17,19 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
         className={`
           ${isMobile ? 'fixed bottom-0 left-0 right-0' : 'relative h-full'}
           ${isMobile && !isOpen ? 'translate-y-full' : ''}
-          ${!isMobile && !isOpen ? 'translate-x-[-100%]' : ''}
           transition-all duration-300 ease-out
-          bg-white shadow-2xl
-          ${isMobile ? 'rounded-t-3xl' : 'rounded-xl'}
+          bg-white
+          ${isMobile ? 'rounded-t-3xl' : 'rounded-2xl'}
           overflow-hidden
         `}
         style={{
-          width: isMobile ? '100%' : isOpen ? (isExpanded ? 'calc(60% - 0.125rem)' : 'calc(30% - 0.125rem)') : '0',
+          width: isMobile ? '100%' : isOpen ? (isExpanded ? 'calc(60% - 8px)' : 'calc(30% - 8px)') : '0',
           height: isMobile ? '50%' : '100%',
           zIndex: isMobile ? 1000 : 'auto',
           flexShrink: 0,
           minWidth: !isMobile && isOpen ? (isExpanded ? '600px' : '350px') : '0',
           maxWidth: !isMobile && isOpen ? (isExpanded ? '900px' : '450px') : '0',
+          boxShadow: isMobile ? '0 -4px 20px rgba(0, 0, 0, 0.08)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
         }}
       >
         {/* Collapse/Expand Button - Desktop Only, positioned on right edge */}
