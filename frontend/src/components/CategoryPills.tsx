@@ -21,6 +21,7 @@ interface CategoryPillsProps {
   onCategorySelect: (categoryId: string | null) => void
   isMobile?: boolean
   isSidebarOpen?: boolean
+  isItineraryOpen?: boolean
   isItineraryExpanded?: boolean
 }
 
@@ -39,6 +40,7 @@ function CategoryPills({
   onCategorySelect, 
   isMobile = false, 
   isSidebarOpen = false,
+  isItineraryOpen = false,
   isItineraryExpanded = false 
 }: CategoryPillsProps) {
   const handleCategoryClick = (categoryId: string) => {
@@ -51,16 +53,20 @@ function CategoryPills({
     }
   }
 
-  // Calculate right offset - stay within map panel, shift when itinerary expands
+  // Calculate right offset - stay within map panel, shift when itinerary is open or expanded
   const getRightOffset = () => {
     if (isMobile) return '1rem' // 16px from right on mobile
     
-    // When itinerary is expanded, shift left to stay visible on map
-    if (isItineraryExpanded) {
-      return '360px' // Adjusted to stay within map boundaries
+    // When itinerary is open OR expanded, shift left to stay visible on map
+    if (isItineraryOpen || isItineraryExpanded) {
+      // Calculate based on whether it's just open (30%) or expanded (60%)
+      if (isItineraryExpanded) {
+        return '100px' // Much further left when expanded to 60%
+      }
+      return '180px' // Shift left when itinerary is open at 30%
     }
     
-    // Default position - positioned to stay within map panel
+    // Default position - positioned normally when itinerary is closed
     return '280px'
   }
 

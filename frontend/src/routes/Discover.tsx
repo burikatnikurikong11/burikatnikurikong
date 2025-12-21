@@ -858,6 +858,7 @@ export default function Discover({
         onCategorySelect={handleCategorySelect}
         isMobile={isMobile}
         isSidebarOpen={isSidebarOpen}
+        isItineraryOpen={isSidebarOpen}
         isItineraryExpanded={isItineraryExpanded}
       />
 
