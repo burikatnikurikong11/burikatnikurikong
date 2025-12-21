@@ -35,6 +35,7 @@ export default function App(){
 
   // Itinerary sidebar state
   const [isItinerarySidebarOpen, setIsItinerarySidebarOpen] = useState(true)
+  const [isItineraryExpanded, setIsItineraryExpanded] = useState(false)
   
   // Chatbot state (now self-contained floating card)
   const [isChatbotOpen, setIsChatbotOpen] = useState(false)
@@ -75,6 +76,10 @@ export default function App(){
     setIsItinerarySidebarOpen(!isItinerarySidebarOpen)
   }
   
+  const toggleItineraryExpanded = () => {
+    setIsItineraryExpanded(!isItineraryExpanded)
+  }
+  
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen)
   }
@@ -82,6 +87,10 @@ export default function App(){
   const toggleMinimalistSidebar = () => {
     setIsMinimalistSidebarOpen(!isMinimalistSidebarOpen)
   }
+
+  // Calculate sidebar width based on expanded state
+  const sidebarWidth = isItineraryExpanded ? '60%' : '30%'
+  const mapWidth = isItineraryExpanded ? '40%' : '70%'
 
   return (
     <div
@@ -116,6 +125,8 @@ export default function App(){
               isOpen={isItinerarySidebarOpen}
               onToggle={toggleItinerarySidebar}
               isMobile={isMobile}
+              isExpanded={isItineraryExpanded}
+              onToggleExpanded={toggleItineraryExpanded}
             />
           )}
 
@@ -128,7 +139,7 @@ export default function App(){
               minWidth: 0,
               width: isMobile 
                 ? '100%' 
-                : (isDiscoverPage && isItinerarySidebarOpen ? 'calc(70% - 0.125rem)' : '100%'),
+                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 0.125rem)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : isMobile ? '100%' : '100%',
               flexShrink: 0
             }}
@@ -136,7 +147,17 @@ export default function App(){
             <Suspense fallback={<div className="p-8 text-center pt-20">Loading...</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/discover" element={<Discover isSidebarOpen={isItinerarySidebarOpen} isMobile={isMobile} onPlaceSelectFromAI={setPlaceSelectHandler} />} />
+                <Route 
+                  path="/discover" 
+                  element={
+                    <Discover 
+                      isSidebarOpen={isItinerarySidebarOpen} 
+                      isMobile={isMobile} 
+                      onPlaceSelectFromAI={setPlaceSelectHandler}
+                      isItineraryExpanded={isItineraryExpanded}
+                    />
+                  } 
+                />
               </Routes>
             </Suspense>
           </div>
