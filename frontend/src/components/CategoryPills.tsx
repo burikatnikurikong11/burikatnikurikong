@@ -51,23 +51,35 @@ function CategoryPills({
     }
   }
 
-  // Calculate left offset based on sidebar state (desktop only)
+  // Calculate left offset to center on map view only (not full viewport)
   const getLeftOffset = () => {
     if (isMobile) return '1rem' // 16px from left on mobile
+    
+    const minimalistSidebar = 92 // 72px (sidebar) + 20px (margins)
+    const pillsHalfWidth = 400 // Half of pills container width (800px / 2)
+    
     if (isSidebarOpen) {
-      // When expanded, pills would be hidden anyway
       if (isItineraryExpanded) {
-        return 'calc(60% + (40% / 2) - 400px)' // Center on smaller map area
+        // Itinerary takes 60%, map takes 40%
+        // Left edge of map = minimalistSidebar + 60% of remaining width
+        // Center of map = left edge + (40% / 2)
+        return `calc(${minimalistSidebar}px + 60% + (40% / 2) - ${pillsHalfWidth}px)`
       }
-      // Center on the map area (70% of screen, accounting for sidebar)
-      return 'calc(30% + (70% / 2) - 400px)' // 30% sidebar + half of remaining 70% - half of pills width
+      // Itinerary takes 30%, map takes 70%
+      // Left edge of map = minimalistSidebar + 30% of remaining width  
+      // Center of map = left edge + (70% / 2)
+      return `calc(${minimalistSidebar}px + 30% + (70% / 2) - ${pillsHalfWidth}px)`
     }
-    return 'calc(50% - 400px)' // Center on full screen
+    
+    // No itinerary open, center on full map width
+    // Left edge of map = minimalistSidebar
+    // Center of map = minimalistSidebar + (remaining width / 2)
+    return `calc(${minimalistSidebar}px + ((100vw - ${minimalistSidebar}px) / 2) - ${pillsHalfWidth}px)`
   }
 
   return (
     <div
-      className={`fixed z-[100] top-6 transition-opacity duration-300 ${
+      className={`fixed z-[100] top-6 transition-all duration-300 ${
         isItineraryExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
       }`}
       style={{
