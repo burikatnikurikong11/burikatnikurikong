@@ -4,6 +4,8 @@ import ToastContainer from './components/ToastContainer'
 import ErrorBoundary from './components/ErrorBoundary'
 import MinimalistSidebar from './components/MinimalistSidebar'
 import MenuButton from './components/MenuButton'
+import ItinerarySidebar from './components/ItinerarySidebar'
+import ChatBubbleButton from './components/ChatBubbleButton'
 import type { PlaceInfo } from './types/api'
 
 // Lazy load route components and heavy components for code splitting
@@ -32,21 +34,24 @@ export default function App(){
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // AI Chatbot sidebar state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  // Itinerary sidebar state (replaces chatbot sidebar)
+  const [isItinerarySidebarOpen, setIsItinerarySidebarOpen] = useState(true)
+  
+  // Chatbot modal state (for chat bubble)
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false)
   
   // Minimalist menu sidebar state (always open on desktop, toggle on mobile)
   const [isMinimalistSidebarOpen, setIsMinimalistSidebarOpen] = useState(false)
 
-  // Persist sidebar state to localStorage
+  // Persist itinerary sidebar state to localStorage
   useEffect(() => {
-    localStorage.setItem('sidebarOpen', String(isSidebarOpen))
-  }, [isSidebarOpen])
+    localStorage.setItem('itinerarySidebarOpen', String(isItinerarySidebarOpen))
+  }, [isItinerarySidebarOpen])
 
-  // Keep AI chatbot sidebar closed on mobile when Discover page loads
+  // Keep itinerary sidebar open on desktop by default
   useEffect(() => {
-    if (isDiscoverPage && isMobile && isSidebarOpen) {
-      setIsSidebarOpen(false)
+    if (isDiscoverPage && !isMobile) {
+      setIsItinerarySidebarOpen(true)
     }
   }, [isDiscoverPage, isMobile])
 
@@ -67,8 +72,12 @@ export default function App(){
     }
   }
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
+  const toggleItinerarySidebar = () => {
+    setIsItinerarySidebarOpen(!isItinerarySidebarOpen)
+  }
+  
+  const toggleChatbot = () => {
+    setIsChatbotOpen(!isChatbotOpen)
   }
   
   const toggleMinimalistSidebar = () => {
@@ -93,66 +102,78 @@ export default function App(){
         <MenuButton onClick={toggleMinimalistSidebar} isOpen={isMinimalistSidebarOpen} />
       </div>
 
-      <ErrorBoundary>
-        {/* Mobile: flex-col (map on top, sidebar bottom sheet), Desktop: flex-row (sidebar on left, map on right) */}
-        {/* Add left margin on desktop to account for always-visible icon bar (72px) */}
-        <div 
-          className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${!isMobile && isDiscoverPage && isSidebarOpen ? 'p-1 gap-1' : ''}`}
-          style={{
-            marginLeft: isMobile ? '0' : '72px', // Space for icon bar on desktop
-            transition: 'margin-left 0.3s ease-out'
-          }}
-        >
-          {/* Pathfinder AI Sidebar/Bottom Sheet - Only show on Discover page */}
-          {isDiscoverPage && (
-            <Suspense fallback={null}>
+      {/* Chatbot Modal (when chat bubble is clicked) */}
+      {isChatbotOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50" 
+            onClick={() => setIsChatbotOpen(false)}
+          />
+          
+          {/* Chatbot Modal */}
+          <div 
+            className="relative w-full max-w-2xl h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+            style={{ margin: '0 20px' }}
+          >
+            <Suspense fallback={<div className="p-8">Loading chatbot...</div>}>
               <ChatBubble
                 onPlaceSelect={handlePlaceSelect}
-                isOpen={isSidebarOpen}
-                onToggle={toggleSidebar}
+                isOpen={true}
+                onToggle={() => setIsChatbotOpen(false)}
                 isMobile={isMobile}
               />
             </Suspense>
+          </div>
+        </div>
+      )}
+
+      <ErrorBoundary>
+        {/* Add left margin on desktop to account for always-visible icon bar (72px) */}
+        <div 
+          className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${!isMobile && isDiscoverPage && isItinerarySidebarOpen ? 'p-1 gap-1' : ''}`}
+          style={{
+            marginLeft: isMobile ? '0' : '72px',
+            transition: 'margin-left 0.3s ease-out'
+          }}
+        >
+          {/* Itinerary Sidebar - Only show on Discover page */}
+          {isDiscoverPage && (
+            <ItinerarySidebar
+              isOpen={isItinerarySidebarOpen}
+              onToggle={toggleItinerarySidebar}
+              isMobile={isMobile}
+            />
           )}
 
           {/* Main Content Area */}
           <div 
-            className={`h-full transition-all duration-300 ${!isMobile && isDiscoverPage && isSidebarOpen ? 'rounded-xl' : ''}`}
+            className={`h-full transition-all duration-300 ${!isMobile && isDiscoverPage && isItinerarySidebarOpen ? 'rounded-xl' : ''}`}
             style={{ 
               position: 'relative', 
               overflow: 'hidden',
               minWidth: 0,
               width: isMobile 
                 ? '100%' 
-                : (isDiscoverPage && isSidebarOpen ? 'calc(70% - 0.125rem)' : '100%'),
-              height: isMobile && isDiscoverPage && isSidebarOpen ? '50%' : isMobile ? '100%' : '100%',
+                : (isDiscoverPage && isItinerarySidebarOpen ? 'calc(70% - 0.125rem)' : '100%'),
+              height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : isMobile ? '100%' : '100%',
               flexShrink: 0
             }}
           >
             <Suspense fallback={<div className="p-8 text-center pt-20">Loading...</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/discover" element={<Discover isSidebarOpen={isSidebarOpen} isMobile={isMobile} onPlaceSelectFromAI={setPlaceSelectHandler} />} />
+                <Route path="/discover" element={<Discover isSidebarOpen={isItinerarySidebarOpen} isMobile={isMobile} onPlaceSelectFromAI={setPlaceSelectHandler} />} />
               </Routes>
             </Suspense>
           </div>
-
-          {/* AI Chatbot Toggle Button - Only show on Discover page when chatbot is closed (desktop only) */}
-          {isDiscoverPage && !isSidebarOpen && !isMobile && (
-            <button
-              onClick={toggleSidebar}
-              className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110"
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none'
-              }}
-              aria-label="Open Pathfinder AI chat"
-            >
-              <img src="/icons/chatbot.svg" alt="Chat" className="w-16 h-16" />
-            </button>
-          )}
         </div>
       </ErrorBoundary>
+
+      {/* Chat Bubble Button - Only show on Discover page */}
+      {isDiscoverPage && (
+        <ChatBubbleButton onClick={toggleChatbot} />
+      )}
 
       <ToastContainer />
     </div>
