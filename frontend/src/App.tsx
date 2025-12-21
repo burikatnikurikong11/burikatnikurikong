@@ -85,7 +85,7 @@ export default function App(){
         backgroundColor: 'var(--sunset-gold)'
       }}
     >
-      {/* Minimalist Sidebar */}
+      {/* Minimalist Sidebar - overlays everything */}
       <MinimalistSidebar isOpen={isMinimalistSidebarOpen} onClose={() => setIsMinimalistSidebarOpen(false)} />
 
       {/* Menu Button (only visible on mobile) */}
@@ -95,11 +95,11 @@ export default function App(){
 
       <ErrorBoundary>
         {/* Mobile: flex-col (map on top, sidebar bottom sheet), Desktop: flex-row (sidebar on left, map on right) */}
-        {/* Add left margin on desktop to account for always-visible sidebar */}
+        {/* Add left margin on desktop to account for always-visible icon bar (72px) */}
         <div 
           className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${!isMobile && isDiscoverPage && isSidebarOpen ? 'p-1 gap-1' : ''}`}
           style={{
-            marginLeft: isMobile ? '0' : '280px', // Space for minimalist sidebar on desktop
+            marginLeft: isMobile ? '0' : '72px', // Space for icon bar on desktop
             transition: 'margin-left 0.3s ease-out'
           }}
         >
