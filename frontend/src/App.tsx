@@ -106,12 +106,15 @@ export default function App(){
       <ErrorBoundary>
         {/* Container with padding and gap for separated panels */}
         <div 
-          className={`h-full ${isMobile ? 'flex flex-col' : 'flex'}`}
+          className={`${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '72px', // Space for icon bar
+            marginLeft: isMobile ? '0' : '88px', // Space for floating icon bar (72px + 16px)
             padding: isMobile ? '0' : '16px',
+            paddingLeft: isMobile ? '0' : '0', // No left padding since we have margin
             gap: isMobile ? '0' : '16px',
-            transition: 'all 0.3s ease-out'
+            height: isMobile ? '100vh' : 'calc(100vh - 32px)', // Full height minus padding
+            transition: 'all 0.3s ease-out',
+            overflow: 'hidden'
           }}
         >
           {/* Itinerary Sidebar - Center Panel (Package List equivalent) */}
@@ -135,7 +138,7 @@ export default function App(){
               width: isMobile 
                 ? '100%' 
                 : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 8px)` : '100%'),
-              height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : isMobile ? '100%' : '100%',
+              height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : '100%',
               flexShrink: 0,
               borderRadius: isMobile ? '0' : '16px',
               backgroundColor: 'white',
