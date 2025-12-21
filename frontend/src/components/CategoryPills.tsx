@@ -21,6 +21,7 @@ interface CategoryPillsProps {
   onCategorySelect: (categoryId: string | null) => void
   isMobile?: boolean
   isSidebarOpen?: boolean
+  isItineraryExpanded?: boolean
 }
 
 const CATEGORIES: Category[] = [
@@ -33,7 +34,13 @@ const CATEGORIES: Category[] = [
   { id: 'culture', label: 'Culture', icon: Landmark, color: '#ec4899' },
 ]
 
-function CategoryPills({ selectedCategory, onCategorySelect, isMobile = false, isSidebarOpen = false }: CategoryPillsProps) {
+function CategoryPills({ 
+  selectedCategory, 
+  onCategorySelect, 
+  isMobile = false, 
+  isSidebarOpen = false,
+  isItineraryExpanded = false 
+}: CategoryPillsProps) {
   const handleCategoryClick = (categoryId: string) => {
     if (categoryId === 'all') {
       onCategorySelect(null)
@@ -48,6 +55,10 @@ function CategoryPills({ selectedCategory, onCategorySelect, isMobile = false, i
   const getLeftOffset = () => {
     if (isMobile) return '1rem' // 16px from left on mobile
     if (isSidebarOpen) {
+      // When expanded, pills would be hidden anyway
+      if (isItineraryExpanded) {
+        return 'calc(60% + (40% / 2) - 400px)' // Center on smaller map area
+      }
       // Center on the map area (70% of screen, accounting for sidebar)
       return 'calc(30% + (70% / 2) - 400px)' // 30% sidebar + half of remaining 70% - half of pills width
     }
@@ -56,7 +67,9 @@ function CategoryPills({ selectedCategory, onCategorySelect, isMobile = false, i
 
   return (
     <div
-      className="fixed z-[100] top-6"
+      className={`fixed z-[100] top-6 transition-opacity duration-300 ${
+        isItineraryExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
+      }`}
       style={{
         left: getLeftOffset(),
         maxWidth: isMobile ? 'calc(100vw - 2rem)' : '800px',
