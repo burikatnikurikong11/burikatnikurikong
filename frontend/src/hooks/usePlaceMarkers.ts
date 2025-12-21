@@ -290,7 +290,7 @@ export function usePlaceMarkers(
         map.on('mouseleave', PLACE_LAYER_ID, handleMouseLeave)
         map.on('click', PLACE_LAYER_ID, handleClick)
       } catch (e) {
-        console.error('Error setting up place markers:', e):
+        console.error('Error setting up place markers:', e)
       }
     }
 
