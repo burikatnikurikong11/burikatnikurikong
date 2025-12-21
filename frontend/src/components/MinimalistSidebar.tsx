@@ -1,6 +1,5 @@
 import { memo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { MapPin, Building2 } from 'lucide-react'
 
 interface MinimalistSidebarProps {
   isOpen: boolean
@@ -51,12 +50,12 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
         }}
       >
         <div className="flex flex-col h-full overflow-hidden">
-          {/* HapiHub Logo / Toggle Button */}
+          {/* HapiHub Logo / Toggle Button - Transparent Background */}
           <div className="px-4 py-4 flex-shrink-0">
             <button
               onClick={toggleSidebar}
               className="w-full h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 relative group"
-              style={{ backgroundColor: 'var(--sunset-gold)' }}
+              style={{ backgroundColor: 'transparent' }}
               title={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
               {isSidebarExpanded ? (
@@ -168,99 +167,6 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
                   }}
                 >
                   Guides
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="py-2">
-              <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.3)' }} />
-            </div>
-
-            {/* Recents Section */}
-            {isSidebarExpanded && (
-              <div className="pt-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider px-4 py-2" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                  Recents
-                </h3>
-              </div>
-            )}
-
-            {/* Recent Locations - Using proper icons */}
-            <div className="relative group">
-              <button
-                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/20 ${
-                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
-                }`}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-              >
-                <Building2 className="w-5 h-5 flex-shrink-0 text-white" />
-                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Caramoran</span>}
-              </button>
-              
-              {!isSidebarExpanded && (
-                <div
-                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
-                    color: 'white',
-                    fontSize: '14px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  Caramoran
-                </div>
-              )}
-            </div>
-
-            <div className="relative group">
-              <button
-                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/20 ${
-                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
-                }`}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-              >
-                <Building2 className="w-5 h-5 flex-shrink-0 text-white" />
-                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Garchitorena</span>}
-              </button>
-              
-              {!isSidebarExpanded && (
-                <div
-                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
-                    color: 'white',
-                    fontSize: '14px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  Garchitorena
-                </div>
-              )}
-            </div>
-
-            <div className="relative group">
-              <button
-                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/20 ${
-                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
-                }`}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-              >
-                <MapPin className="w-5 h-5 flex-shrink-0 text-white" />
-                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Virac Point</span>}
-              </button>
-              
-              {!isSidebarExpanded && (
-                <div
-                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
-                    color: 'white',
-                    fontSize: '14px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  Virac Point
                 </div>
               )}
             </div>
