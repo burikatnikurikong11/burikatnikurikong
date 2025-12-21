@@ -55,26 +55,30 @@ function CategoryPills({
   const getLeftOffset = () => {
     if (isMobile) return '1rem' // 16px from left on mobile
     
-    const minimalistSidebar = 80 // 72px (sidebar) + 8px (4px left gap + 4px right gap)
+    const sidebarAndMargins = 80 // 72px sidebar + 8px (4px left + 4px right gaps)
+    const rightMargin = 8 // 4px margin on right side + 4px for calculations
     const pillsHalfWidth = 400 // Half of pills container width (800px / 2)
     
     if (isSidebarOpen) {
       if (isItineraryExpanded) {
         // Itinerary takes 60%, map takes 40%
-        // Left edge of map = minimalistSidebar + 60% of remaining width
-        // Center of map = left edge + (40% / 2)
-        return `calc(${minimalistSidebar}px + 60% + (40% / 2) - ${pillsHalfWidth}px)`
+        // Container width = 100vw - 80px - 8px
+        // Left edge of map = 80px + 60% of container + 4px gap
+        // Center of map = left edge + (40% of container / 2)
+        return `calc(${sidebarAndMargins}px + 60% + (40% / 2) - ${pillsHalfWidth}px)`
       }
       // Itinerary takes 30%, map takes 70%
-      // Left edge of map = minimalistSidebar + 30% of remaining width  
-      // Center of map = left edge + (70% / 2)
-      return `calc(${minimalistSidebar}px + 30% + (70% / 2) - ${pillsHalfWidth}px)`
+      // Container width = 100vw - 80px - 8px
+      // Left edge of map = 80px + 30% of container + 4px gap
+      // Center of map = left edge + (70% of container / 2)
+      return `calc(${sidebarAndMargins}px + 30% + (70% / 2) - ${pillsHalfWidth}px)`
     }
     
     // No itinerary open, center on full map width
-    // Left edge of map = minimalistSidebar
-    // Center of map = minimalistSidebar + (remaining width / 2)
-    return `calc(${minimalistSidebar}px + ((100vw - ${minimalistSidebar}px) / 2) - ${pillsHalfWidth}px)`
+    // Container starts at 80px, ends at 100vw - 8px
+    // Available width = 100vw - 80px - 8px = 100vw - 88px
+    // Center = start (80px) + (available width / 2) - half pills width
+    return `calc(${sidebarAndMargins}px + ((100vw - ${sidebarAndMargins}px - ${rightMargin}px) / 2) - ${pillsHalfWidth}px)`
   }
 
   return (
