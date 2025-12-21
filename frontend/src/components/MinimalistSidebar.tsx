@@ -4,9 +4,10 @@ import { useLocation } from 'react-router-dom'
 interface MinimalistSidebarProps {
   isOpen: boolean
   onClose: () => void
+  onToggleItinerary?: () => void
 }
 
-function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
+function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSidebarProps) {
   const location = useLocation()
   const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -105,6 +106,36 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
               )}
             </div>
 
+            {/* Plan Button with Tooltip - Toggles Itinerary Panel */}
+            <div className="relative group">
+              <button
+                onClick={onToggleItinerary}
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ color: 'white' }}
+              >
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                {isSidebarExpanded && <span className="text-base font-medium truncate">Plan</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Plan
+                </div>
+              )}
+            </div>
+
             {/* Guides Button with Tooltip */}
             <div className="relative group">
               <button
@@ -114,7 +145,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 style={{ color: 'white' }}
               >
                 <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 {isSidebarExpanded && <span className="text-base font-medium truncate">Guides</span>}
               </button>
@@ -130,35 +161,6 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                   }}
                 >
                   Guides
-                </div>
-              )}
-            </div>
-
-            {/* Directions Button with Tooltip */}
-            <div className="relative group">
-              <button
-                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
-                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
-                }`}
-                style={{ color: 'white' }}
-              >
-                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                {isSidebarExpanded && <span className="text-base font-medium truncate">Directions</span>}
-              </button>
-              
-              {!isSidebarExpanded && (
-                <div
-                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
-                  style={{
-                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
-                    color: 'white',
-                    fontSize: '14px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  Directions
                 </div>
               )}
             </div>
