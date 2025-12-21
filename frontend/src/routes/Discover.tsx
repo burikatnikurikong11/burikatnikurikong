@@ -83,23 +83,35 @@ export default function Discover({
   }, [selectedTouristSpot])
   
   // Helper function to calculate padding for sidebar offset
+  // This ensures the camera centers on the visible map area, not on the marker itself
   const getPaddingForSidebar = useCallback(() => {
     if (!map || isMobile || !isSidebarOpen) {
       return { left: 0, right: 0, top: 0, bottom: 0 }
     }
     
-    const sidebarWidthPercent = 30
+    // Calculate itinerary panel width based on expanded state
+    const itineraryWidthPercent = isItineraryExpanded ? 60 : 30
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
-    const sidebarWidth = (windowWidth * sidebarWidthPercent) / 100
     
+    // Account for the minimalist sidebar (72px + 8px margin = 80px)
+    const minimalistSidebarWidth = 80
+    
+    // Calculate actual itinerary panel width in pixels
+    // The itinerary takes up a percentage of the remaining width after the minimalist sidebar
+    const availableWidth = windowWidth - minimalistSidebarWidth - 8 // 8px for gaps
+    const itineraryWidth = (availableWidth * itineraryWidthPercent) / 100
+    
+    // To center the camera on the visible map area:
+    // Add left padding equal to half the itinerary width
+    // This shifts the center point to the middle of the visible map
     return {
-      left: sidebarWidth / 2,
+      left: itineraryWidth / 2,
       right: 0,
       top: 0,
-      bottom: windowHeight * 0.15
+      bottom: windowHeight * 0.1 // Small bottom padding
     }
-  }, [map, isMobile, isSidebarOpen])
+  }, [map, isMobile, isSidebarOpen, isItineraryExpanded])
   
   // Handle category selection
   const handleCategorySelect = useCallback((categoryId: string | null) => {
@@ -421,12 +433,8 @@ export default function Discover({
               const altitudeAdjustment = modelAltitude > 20 ? 0.3 : 0
               const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
-              const padding = isSidebarOpen && !isMobile ? {
-                left: (window.innerWidth * 30) / 100 / 2,
-                right: 0,
-                top: 0,
-                bottom: window.innerHeight * 0.15
-              } : { left: 0, right: 0, top: 0, bottom: 0 }
+              // Use the proper padding calculation that accounts for itinerary state
+              const padding = isSidebarOpen && !isMobile ? getPaddingForSidebar() : { left: 0, right: 0, top: 0, bottom: 0 }
 
               mapInstance.flyTo({
                 center: model.coordinates,
