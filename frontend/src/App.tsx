@@ -96,7 +96,11 @@ export default function App(){
       }}
     >
       {/* Minimalist Sidebar - overlays everything on mobile, floating on desktop (z-index 1600) */}
-      <MinimalistSidebar isOpen={isMinimalistSidebarOpen} onClose={() => setIsMinimalistSidebarOpen(false)} />
+      <MinimalistSidebar 
+        isOpen={isMinimalistSidebarOpen} 
+        onClose={() => setIsMinimalistSidebarOpen(false)}
+        onToggleItinerary={toggleItinerarySidebar}
+      />
 
       {/* Menu Button (only visible on mobile) */}
       <div className="md:hidden">
