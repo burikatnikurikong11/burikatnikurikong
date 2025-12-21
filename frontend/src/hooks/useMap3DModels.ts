@@ -20,11 +20,13 @@ import toast from 'react-hot-toast'
  * 
  * @param map - MapLibre map instance (null if not initialized)
  * @param models - Array of 3D model configurations to add to the map
+ * @param modelsEnabled - Whether 3D models should be rendered (default: true)
  */
 
 export function useMap3DModels(
   map: maplibregl.Map | null,
-  models: Model3DConfig[]
+  models: Model3DConfig[],
+  modelsEnabled: boolean = true
 ) {
   const layersAdded = useRef<Set<string>>(new Set())
   const mapRef = useRef<maplibregl.Map | null>(null)
@@ -69,7 +71,7 @@ export function useMap3DModels(
 
   useEffect(() => {
     mapRef.current = map
-    if (!map) return
+    if (!map || !modelsEnabled) return
 
     // Wait for map to be fully loaded and terrain to be ready
     const addModels = () => {
@@ -172,11 +174,11 @@ export function useMap3DModels(
         }
       })
     }
-  }, [map, memoizedModels, modelVisibility, handleModelError, handleModelLoad, handleModelProgress])
+  }, [map, memoizedModels, modelsEnabled, modelVisibility, handleModelError, handleModelLoad, handleModelProgress])
   
   // Update model visibility when visibility state changes
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapRef.current || !modelsEnabled) return
     
     const currentMap = mapRef.current
     memoizedModels.forEach((modelConfig) => {
@@ -185,6 +187,5 @@ export function useMap3DModels(
         currentMap.setLayoutProperty(modelConfig.id, 'visibility', isVisible ? 'visible' : 'none')
       }
     })
-  }, [memoizedModels, modelVisibility])
+  }, [memoizedModels, modelsEnabled, modelVisibility])
 }
-
