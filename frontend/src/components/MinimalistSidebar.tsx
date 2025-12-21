@@ -31,16 +31,20 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
         />
       )}
 
-      {/* Main minimalist sidebar - collapsible/expandable */}
+      {/* Main minimalist sidebar - collapsible/expandable - FLOATING CARD */}
       <div
-        className={`fixed top-0 left-0 h-full z-[1600] transition-all duration-300 ease-out ${
+        className={`fixed z-[1600] transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         style={{
+          top: '16px',
+          left: '16px',
+          height: 'calc(100vh - 32px)',
           width: isSidebarExpanded ? '280px' : '72px',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
-          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          borderRadius: '16px',
         }}
       >
         <div className="flex flex-col h-full">
@@ -65,7 +69,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex flex-col space-y-2 flex-1 px-4">
+          <nav className="flex flex-col space-y-2 flex-1 px-4 overflow-y-auto">
             {/* Search Button with Tooltip */}
             <div className="relative group">
               <button
@@ -266,18 +270,21 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
         </div>
       </div>
 
-      {/* Expandable Search Panel */}
+      {/* Expandable Search Panel - Also floating */}
       <div
-        className={`fixed top-0 h-full z-[1550] transition-all duration-300 ease-out ${
+        className={`fixed z-[1550] transition-all duration-300 ease-out ${
           isSearchPanelOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
         }`}
         style={{
-          left: isSidebarExpanded ? '280px' : '72px',
+          top: '16px',
+          left: isSidebarExpanded ? 'calc(280px + 32px)' : 'calc(72px + 32px)',
+          height: 'calc(100vh - 32px)',
           width: '420px',
-          maxWidth: 'calc(100vw - 72px)',
+          maxWidth: 'calc(100vw - 104px)',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
-          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          borderRadius: '16px',
           pointerEvents: isSearchPanelOpen ? 'auto' : 'none',
         }}
       >
