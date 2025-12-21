@@ -18,7 +18,7 @@ function CurtainSidebar({ isOpen, onClose, children }: CurtainSidebarProps) {
         />
       )}
 
-      {/* Curtain-shaped sidebar */}
+      {/* Curtain-shaped sidebar with BINURONG flowing waves */}
       <div
         className={`fixed top-0 left-0 h-full z-[1600] transition-transform duration-500 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -28,12 +28,12 @@ function CurtainSidebar({ isOpen, onClose, children }: CurtainSidebarProps) {
           maxWidth: '90vw',
         }}
       >
-        {/* Curtain shape with clip-path */}
+        {/* Flowing wave shape with multiple curves - matching BINURONG */}
         <div
           className="relative h-full overflow-hidden"
           style={{
-            clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
-            WebkitClipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
+            clipPath: `path('M 0 0 L 400 0 C 380 100, 390 200, 370 300 C 360 350, 365 400, 355 450 C 345 500, 350 550, 340 600 C 330 650, 335 700, 325 750 C 315 800, 320 850, 310 900 C 300 950, 305 1000, 295 1050 C 285 1100, 290 1150, 280 1200 C 270 1300, 275 1400, 265 1500 C 255 1600, 0 1600, 0 1600 Z')`,
+            WebkitClipPath: `path('M 0 0 L 400 0 C 380 100, 390 200, 370 300 C 360 350, 365 400, 355 450 C 345 500, 350 550, 340 600 C 330 650, 335 700, 325 750 C 315 800, 320 850, 310 900 C 300 950, 305 1000, 295 1050 C 285 1100, 290 1150, 280 1200 C 270 1300, 275 1400, 265 1500 C 255 1600, 0 1600, 0 1600 Z')`,
           }}
         >
           {/* Abaca texture background */}
@@ -123,16 +123,21 @@ function CurtainSidebar({ isOpen, onClose, children }: CurtainSidebarProps) {
             <div className="px-6 pb-8">{children}</div>
           </div>
 
-          {/* Decorative curtain edge - thinner at bottom */}
+          {/* Decorative flowing edge shadows - multiple waves */}
           <div
-            className="absolute top-0 right-0 h-full pointer-events-none"
+            className="absolute inset-y-0 right-0 w-12 pointer-events-none"
             style={{
-              width: '2px',
-              background: 'linear-gradient(180deg, rgba(101, 84, 56, 0.6) 0%, rgba(101, 84, 56, 0.2) 100%)',
+              background: `
+                radial-gradient(ellipse at 50% 20%, rgba(101, 84, 56, 0.3) 0%, transparent 70%),
+                radial-gradient(ellipse at 50% 40%, rgba(101, 84, 56, 0.25) 0%, transparent 70%),
+                radial-gradient(ellipse at 50% 60%, rgba(101, 84, 56, 0.2) 0%, transparent 70%),
+                radial-gradient(ellipse at 50% 80%, rgba(101, 84, 56, 0.15) 0%, transparent 70%),
+                linear-gradient(180deg, rgba(101, 84, 56, 0.4) 0%, rgba(101, 84, 56, 0.1) 100%)
+              `,
             }}
           />
 
-          {/* Decorative curtain folds */}
+          {/* Decorative curtain folds at top */}
           <div
             className="absolute top-0 left-0 w-full h-20 pointer-events-none opacity-30"
             style={{
