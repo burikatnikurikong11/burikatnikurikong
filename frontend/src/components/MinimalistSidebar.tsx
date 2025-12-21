@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 interface MinimalistSidebarProps {
   isOpen: boolean
@@ -10,6 +10,15 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
   const location = useLocation()
   const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded)
+    // Close search panel when collapsing sidebar
+    if (isSidebarExpanded) {
+      setIsSearchPanelOpen(false)
+    }
+  }
 
   return (
     <>
@@ -22,101 +31,231 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
         />
       )}
 
-      {/* Main minimalist sidebar - collapsible icon bar */}
+      {/* Main minimalist sidebar - collapsible/expandable */}
       <div
-        className={`fixed top-0 left-0 h-full z-[1600] transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 h-full z-[1600] transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         style={{
-          width: '72px',
+          width: isSidebarExpanded ? '280px' : '72px',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
           boxShadow: '4px 0 24px rgba(0, 0, 0, 0.15)',
         }}
       >
-        <div className="flex flex-col h-full items-center py-4">
-          {/* HapiHub Logo */}
-          <Link
-            to="/"
-            className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all hover:bg-white/10"
-            style={{ backgroundColor: 'var(--sunset-gold)' }}
-            title="HapiHub"
-          >
-            <span className="text-2xl">🗺️</span>
-          </Link>
-
-          {/* Navigation Icons */}
-          <nav className="flex flex-col items-center space-y-2 flex-1">
-            {/* Search Icon */}
+        <div className="flex flex-col h-full">
+          {/* HapiHub Logo / Toggle Button */}
+          <div className="px-4 py-4">
             <button
-              onClick={() => setIsSearchPanelOpen(!isSearchPanelOpen)}
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{
-                backgroundColor: isSearchPanelOpen ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                color: 'white',
-              }}
-              title="Search"
+              onClick={toggleSidebar}
+              className="w-full h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 relative group"
+              style={{ backgroundColor: 'var(--sunset-gold)' }}
+              title={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              {isSidebarExpanded ? (
+                // Close X icon when expanded
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                // Chatbot logo when collapsed
+                <img src="/icons/chatbot.svg" alt="HapiHub" className="w-8 h-8" />
+              )}
             </button>
+          </div>
 
-            {/* Guides Icon */}
-            <button
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{ color: 'white' }}
-              title="Guides"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </button>
+          {/* Navigation */}
+          <nav className="flex flex-col space-y-2 flex-1 px-4">
+            {/* Search Button with Tooltip */}
+            <div className="relative group">
+              <button
+                onClick={() => setIsSearchPanelOpen(!isSearchPanelOpen)}
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{
+                  backgroundColor: isSearchPanelOpen ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                  color: 'white',
+                }}
+              >
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {isSidebarExpanded && <span className="text-base font-medium">Search</span>}
+              </button>
+              
+              {/* Tooltip - only show when sidebar is collapsed */}
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Search
+                </div>
+              )}
+            </div>
 
-            {/* Directions Icon */}
-            <button
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{ color: 'white' }}
-              title="Directions"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-            </button>
+            {/* Guides Button with Tooltip */}
+            <div className="relative group">
+              <button
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ color: 'white' }}
+              >
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                {isSidebarExpanded && <span className="text-base font-medium">Guides</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Guides
+                </div>
+              )}
+            </div>
+
+            {/* Directions Button with Tooltip */}
+            <div className="relative group">
+              <button
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ color: 'white' }}
+              >
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                {isSidebarExpanded && <span className="text-base font-medium">Directions</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Directions
+                </div>
+              )}
+            </div>
 
             {/* Divider */}
-            <div className="w-8 my-2" style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+            <div className="py-2">
+              <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+            </div>
+
+            {/* Recents Section */}
+            {isSidebarExpanded && (
+              <div className="pt-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider px-4 py-2" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                  Recents
+                </h3>
+              </div>
+            )}
 
             {/* Recent Locations */}
-            <button
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              title="Caramoran"
-            >
-              <span className="text-lg">🏛️</span>
-            </button>
+            <div className="relative group">
+              <button
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                <span className="text-lg flex-shrink-0">🏛️</span>
+                {isSidebarExpanded && <span className="text-sm font-medium text-white">Caramoran</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Caramoran
+                </div>
+              )}
+            </div>
 
-            <button
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              title="Garchitorena"
-            >
-              <span className="text-lg">🏛️</span>
-            </button>
+            <div className="relative group">
+              <button
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                <span className="text-lg flex-shrink-0">🏛️</span>
+                {isSidebarExpanded && <span className="text-sm font-medium text-white">Garchitorena</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Garchitorena
+                </div>
+              )}
+            </div>
 
-            <button
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              title="Virac Point"
-            >
-              <span className="text-lg">📍</span>
-            </button>
+            <div className="relative group">
+              <button
+                className={`w-full h-12 rounded-xl flex items-center transition-all hover:bg-white/10 ${
+                  isSidebarExpanded ? 'px-4 gap-3' : 'justify-center'
+                }`}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                <span className="text-lg flex-shrink-0">📍</span>
+                {isSidebarExpanded && <span className="text-sm font-medium text-white">Virac Point</span>}
+              </button>
+              
+              {!isSidebarExpanded && (
+                <div
+                  className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  style={{
+                    backgroundColor: 'rgba(30, 35, 45, 0.98)',
+                    color: 'white',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  Virac Point
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Close button for mobile */}
           <button
             onClick={onClose}
-            className="md:hidden w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 mt-auto"
+            className="md:hidden mx-4 mb-4 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
             style={{ color: 'rgba(255, 255, 255, 0.7)' }}
             aria-label="Close sidebar"
           >
@@ -133,7 +272,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           isSearchPanelOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
         }`}
         style={{
-          left: '72px',
+          left: isSidebarExpanded ? '280px' : '72px',
           width: '420px',
           maxWidth: 'calc(100vw - 72px)',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
