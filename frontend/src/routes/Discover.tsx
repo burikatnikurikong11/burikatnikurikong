@@ -25,9 +25,15 @@ interface DiscoverProps {
   isSidebarOpen?: boolean
   isMobile?: boolean
   onPlaceSelectFromAI?: (handler: (place: PlaceInfoType) => void) => void
+  isItineraryExpanded?: boolean
 }
 
-export default function Discover({ isSidebarOpen = false, isMobile = false, onPlaceSelectFromAI }: DiscoverProps) {
+export default function Discover({ 
+  isSidebarOpen = false, 
+  isMobile = false, 
+  onPlaceSelectFromAI,
+  isItineraryExpanded = false 
+}: DiscoverProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const [map, setMap] = useState<maplibregl.Map | null>(null)
@@ -754,6 +760,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         onCategorySelect={handleCategorySelect}
         isMobile={isMobile}
         isSidebarOpen={isSidebarOpen}
+        isItineraryExpanded={isItineraryExpanded}
       />
 
       {/* Map Controls (Map Style, Current Location, Reset Camera) */}
