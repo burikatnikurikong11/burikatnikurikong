@@ -104,7 +104,7 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Container with smaller gaps for even tighter layout */}
+        {/* Container with minimal gap for very tight layout */}
         {/* Desktop: positioned beside sidebar with correct width to prevent scrollbars */}
         <div 
           className={`${isMobile ? 'flex flex-col' : 'flex'}`}
@@ -113,7 +113,7 @@ export default function App(){
             marginTop: isMobile ? '0' : '4px',
             marginBottom: isMobile ? '0' : '4px',
             marginRight: isMobile ? '0' : '4px',
-            gap: isMobile ? '0' : '4px', // Reduced from 8px to 4px
+            gap: isMobile ? '0' : '2px', // Reduced from 4px to 2px for very tight spacing
             width: isMobile ? '100vw' : 'calc(100vw - 92px - 8px)', // Full width minus sidebar space and margins
             height: isMobile ? '100vh' : 'calc(100vh - 8px)', // Full height minus top/bottom margins
             transition: 'all 0.3s ease-out',
@@ -140,7 +140,7 @@ export default function App(){
               minWidth: 0,
               width: isMobile 
                 ? '100%' 
-                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 2px)` : '100%'),
+                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 1px)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : '100%',
               flexShrink: 0,
               borderRadius: isMobile ? '0' : '16px', // 16px border radius on all corners
