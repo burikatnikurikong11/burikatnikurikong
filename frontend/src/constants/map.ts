@@ -31,7 +31,7 @@ export const MODEL_CONFIG = {
 export const ANIMATION_CONFIG = {
   FLY_TO_DURATION: 2000, // milliseconds
   ORBIT_DURATION: 0, // 0 = infinite
-  DEFAULT_ZOOM_ON_SELECT: 19,
+  DEFAULT_ZOOM_ON_SELECT: 20.5, // Increased from 19 for closer view of tourist spots
 } as const
 
 /**
@@ -42,4 +42,3 @@ export const UI_CONFIG = {
   TOAST_DURATION_ERROR: 5000,
   LOADING_TIMEOUT: 10000, // milliseconds
 } as const
-
