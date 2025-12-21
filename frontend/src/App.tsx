@@ -117,7 +117,7 @@ export default function App(){
             width: isMobile ? '100vw' : 'calc(100vw - 92px - 8px)', // Full width minus sidebar space and margins
             height: isMobile ? '100vh' : 'calc(100vh - 8px)', // Full height minus top/bottom margins
             transition: 'all 0.3s ease-out',
-            overflow: 'hidden'
+            overflow: 'visible', // Changed from hidden to visible to show rounded corners
           }}
         >
           {/* Itinerary Sidebar - Left Panel (starts beside the floating sidebar) */}
@@ -143,7 +143,7 @@ export default function App(){
                 : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 2px)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : '100%',
               flexShrink: 0,
-              borderRadius: isMobile ? '0' : '16px',
+              borderRadius: isMobile ? '0' : '16px', // 16px border radius on all corners
               backgroundColor: 'white',
               boxShadow: isMobile ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.08)',
             }}
