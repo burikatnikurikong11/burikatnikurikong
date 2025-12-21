@@ -104,18 +104,18 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Container with gap for separated panels */}
+        {/* Container with smaller gaps for tighter layout */}
         {/* Desktop: positioned beside sidebar with correct width to prevent scrollbars */}
         <div 
           className={`${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '104px', // Space for floating sidebar (72px + 32px margins)
-            marginTop: isMobile ? '0' : '16px',
-            marginBottom: isMobile ? '0' : '16px',
-            marginRight: isMobile ? '0' : '16px',
-            gap: isMobile ? '0' : '16px',
-            width: isMobile ? '100vw' : 'calc(100vw - 104px - 32px)', // Full width minus sidebar space and margins
-            height: isMobile ? '100vh' : 'calc(100vh - 32px)', // Full height minus top/bottom margins
+            marginLeft: isMobile ? '0' : '96px', // Space for floating sidebar (72px + 24px margins)
+            marginTop: isMobile ? '0' : '8px',
+            marginBottom: isMobile ? '0' : '8px',
+            marginRight: isMobile ? '0' : '8px',
+            gap: isMobile ? '0' : '8px', // Reduced from 16px to 8px
+            width: isMobile ? '100vw' : 'calc(100vw - 96px - 16px)', // Full width minus sidebar space and margins
+            height: isMobile ? '100vh' : 'calc(100vh - 16px)', // Full height minus top/bottom margins
             transition: 'all 0.3s ease-out',
             overflow: 'hidden'
           }}
@@ -140,7 +140,7 @@ export default function App(){
               minWidth: 0,
               width: isMobile 
                 ? '100%' 
-                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 8px)` : '100%'),
+                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 4px)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : '100%',
               flexShrink: 0,
               borderRadius: isMobile ? '0' : '16px',
