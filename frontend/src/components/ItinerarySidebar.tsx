@@ -1,12 +1,15 @@
 import { memo } from 'react'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 interface ItinerarySidebarProps {
   isOpen: boolean
   onToggle: () => void
   isMobile: boolean
+  isExpanded?: boolean
+  onToggleExpanded?: () => void
 }
 
-function ItinerarySidebar({ isOpen, onToggle, isMobile }: ItinerarySidebarProps) {
+function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onToggleExpanded }: ItinerarySidebarProps) {
   return (
     <>
       {/* Desktop: Left sidebar with collapse button, Mobile: Bottom sheet */}
@@ -21,12 +24,12 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile }: ItinerarySidebarProps)
           overflow-hidden
         `}
         style={{
-          width: isMobile ? '100%' : isOpen ? 'calc(30% - 0.125rem)' : '0',
+          width: isMobile ? '100%' : isOpen ? (isExpanded ? 'calc(60% - 0.125rem)' : 'calc(30% - 0.125rem)') : '0',
           height: isMobile ? '50%' : '100%',
           zIndex: isMobile ? 1000 : 'auto',
           flexShrink: 0,
-          minWidth: !isMobile && isOpen ? '350px' : '0',
-          maxWidth: !isMobile && isOpen ? '450px' : '0',
+          minWidth: !isMobile && isOpen ? (isExpanded ? '600px' : '350px') : '0',
+          maxWidth: !isMobile && isOpen ? (isExpanded ? '900px' : '450px') : '0',
         }}
       >
         {/* Collapse/Expand Button - Desktop Only, positioned on right edge */}
@@ -52,6 +55,27 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile }: ItinerarySidebarProps)
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
             </svg>
+          </button>
+        )}
+
+        {/* Expand/Compress Button - Desktop Only, positioned below collapse button */}
+        {!isMobile && isOpen && onToggleExpanded && (
+          <button
+            onClick={onToggleExpanded}
+            className="absolute top-1/2 -right-10 transform translate-y-16 z-10
+                       w-10 h-20 rounded-r-xl flex items-center justify-center
+                       transition-all duration-300 hover:w-12 group
+                       shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
+            }}
+            aria-label={isExpanded ? 'Compress panel' : 'Expand panel'}
+          >
+            {isExpanded ? (
+              <ChevronLeft className="w-6 h-6 text-white" strokeWidth={2.5} />
+            ) : (
+              <ChevronRight className="w-6 h-6 text-white" strokeWidth={2.5} />
+            )}
           </button>
         )}
 
