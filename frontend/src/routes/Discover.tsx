@@ -13,6 +13,7 @@ import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
 import ItineraryButton from '../components/ItineraryButton'
+import ResetCameraButton from '../components/ResetCameraButton'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
 import toast from 'react-hot-toast'
@@ -838,6 +839,9 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
         ref={mapContainer}
         className="w-full h-full"
       />
+
+      {/* Reset Camera Button */}
+      <ResetCameraButton onClick={handleResetCamera} />
 
       {/* Bookmark-style Itinerary Button */}
       <ItineraryButton onClick={handleItineraryClick} count={0} />
