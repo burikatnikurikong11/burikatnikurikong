@@ -23,7 +23,7 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
           overflow-hidden
         `}
         style={{
-          width: isMobile ? '100%' : isOpen ? (isExpanded ? 'calc(60% - 8px)' : 'calc(30% - 8px)') : '0',
+          width: isMobile ? '100%' : isOpen ? (isExpanded ? 'calc(60% - 2px)' : 'calc(30% - 2px)') : '0',
           height: isMobile ? '50%' : '100%',
           zIndex: isMobile ? 1000 : 'auto',
           flexShrink: 0,
