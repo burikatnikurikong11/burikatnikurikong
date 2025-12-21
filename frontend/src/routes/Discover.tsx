@@ -13,6 +13,7 @@ import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
 import MapControls from '../components/MapControls'
+import CategoryPills from '../components/CategoryPills'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
 import toast from 'react-hot-toast'
@@ -38,6 +39,9 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const [hoveredPlace, setHoveredPlace] = useState<Place | null>(null)
   const [selectedPlaceMunicipalityGeocode, setSelectedPlaceMunicipalityGeocode] = useState<string | null>(null)
   const selectedMunicipalityRef = useRef<string | null>(null)
+  
+  // Category filter state
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   
   // Municipality tooltip state
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
@@ -85,6 +89,13 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       bottom: windowHeight * 0.15
     }
   }, [map, isMobile, isSidebarOpen])
+  
+  // Handle category selection
+  const handleCategorySelect = useCallback((categoryId: string | null) => {
+    setSelectedCategory(categoryId)
+    // TODO: Filter markers based on category
+    // This will be implemented when you have category data in your tourist spots
+  }, [])
   
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
@@ -736,6 +747,13 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   return (
     <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }}>
       <div ref={mapContainer} className="w-full h-full" />
+
+      {/* Category Filter Pills */}
+      <CategoryPills
+        selectedCategory={selectedCategory}
+        onCategorySelect={handleCategorySelect}
+        isMobile={isMobile}
+      />
 
       {/* Map Controls (Map Style, Current Location, Reset Camera) */}
       <MapControls 
