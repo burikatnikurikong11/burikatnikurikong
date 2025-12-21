@@ -12,6 +12,8 @@ import { useStore } from '../state/store'
 import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
+import MunicipalityInfoBadge from '../components/MunicipalityInfoBadge'
+import MunicipalityInfoModal from '../components/MunicipalityInfoModal'
 import ResetCameraButton from '../components/ResetCameraButton'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
@@ -39,10 +41,13 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const [selectedPlaceMunicipalityGeocode, setSelectedPlaceMunicipalityGeocode] = useState<string | null>(null)
   const selectedMunicipalityRef = useRef<string | null>(null)
   
+  // Municipality modal state
+  const [isMunicipalityModalOpen, setIsMunicipalityModalOpen] = useState(false)
+  
   // Municipality tooltip state
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isTooltipVisible, setIsTooltipVisible] = useState(true) // Add visibility state
+  const [isTooltipVisible, setIsTooltipVisible] = useState(true)
   
   // Store event handlers for cleanup
   const eventHandlersRef = useRef<{
@@ -73,27 +78,22 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       return { left: 0, right: 0, top: 0, bottom: 0 }
     }
     
-    // Calculate sidebar width (30% of window width)
     const sidebarWidthPercent = 30
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
     const sidebarWidth = (windowWidth * sidebarWidthPercent) / 100
     
-    // Add padding to center the marker in the visible area
-    // Left padding: shift center to account for sidebar
-    // Bottom padding: shift center up to account for info card at bottom
     return {
-      left: sidebarWidth / 2, // Half of sidebar width to center in visible area
+      left: sidebarWidth / 2,
       right: 0,
       top: 0,
-      bottom: windowHeight * 0.15 // Add bottom padding to shift marker up (15% of viewport height)
+      bottom: windowHeight * 0.15
     }
   }, [map, isMobile, isSidebarOpen])
   
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
     setSelectedTouristSpot(null)
-    // Re-enable tooltip when closing info panel
     setIsTooltipVisible(true)
   }, [setSelectedTouristSpot])
 
@@ -101,14 +101,13 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const handleResetCamera = useCallback(() => {
     if (!map) return
 
-    // Clear all selections and close info cards
     setSelectedMunicipalityGeocode(null)
     setSelectedPlace(null)
     setHoveredPlace(null)
     setSelectedPlaceMunicipalityGeocode(null)
-    setSelectedTouristSpot(null) // Close tourist spot info card
+    setSelectedTouristSpot(null)
+    setIsMunicipalityModalOpen(false)
     selectedMunicipalityRef.current = null
-    // Re-enable tooltip when resetting
     setIsTooltipVisible(true)
 
     map.flyTo({
@@ -126,10 +125,8 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     if (!map) return
 
     setSelectedPlace(place)
-    // Hide tooltip when a place is selected
     setIsTooltipVisible(false)
 
-    // Find and store the geocode for this place's municipality
     const municipalityName = place.municipality.toUpperCase().replace(/\s+/g, '_')
     const geocodeKey = Object.keys(MUNICIPALITY_GEOCODES).find(
       key => key === municipalityName
@@ -139,8 +136,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       setSelectedPlaceMunicipalityGeocode(MUNICIPALITY_GEOCODES[geocodeKey])
     }
 
-    // Zoom in, center on marker with 45-degree angle
-    // Add padding to account for sidebar
     map.flyTo({
       center: place.coordinates,
       zoom: 17,
@@ -155,11 +150,9 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   // Handle place hover
   const handlePlaceHover = useCallback((place: Place | null) => {
     setHoveredPlace(place)
-    // Hide tooltip when hovering over a place marker
     if (place) {
       setIsTooltipVisible(false)
     } else {
-      // Only show tooltip again if no selections are active
       if (!selectedPlace && !selectedTouristSpot && !selectedMunicipalityGeocode) {
         setIsTooltipVisible(true)
       }
@@ -170,35 +163,27 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const handleClosePlaceInfo = useCallback(() => {
     setSelectedPlace(null)
     setHoveredPlace(null)
-    // Re-enable tooltip when closing place info
     setIsTooltipVisible(true)
   }, [])
 
   // Handle place selection from AI chatbot
   const handlePlaceFromAI = useCallback((place: PlaceInfoType) => {
-    // Match place to model
     const modelId = matchPlaceToModel(place)
     
     if (!modelId) {
-      // Place doesn't match any model, just log it
       console.log('Place from AI does not match any 3D model:', place)
       return
     }
     
-    // Find the model
     const model = touristSpotModels.find(m => m.id === modelId)
     if (!model || !map) {
       return
     }
     
-    // Select the model (this will show the info card)
     setSelectedTouristSpot(modelId)
-    // Hide tooltip when a tourist spot is selected
     setIsTooltipVisible(false)
     
-    // Calculate marker coordinates with the same offset as markers use
-    // This matches the marker click animation behavior exactly
-    const geoOffset: [number, number] = [45, 25] // metersNorth, metersEast - same as useMap3DMarkers
+    const geoOffset: [number, number] = [45, 25]
     const [metersNorth, metersEast] = geoOffset
     const markerCoordinates = offsetCoordinates(
       model.coordinates[0],
@@ -207,16 +192,12 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       metersEast
     )
     
-    // Fly to marker with 45-degree angle, centered on the marker
-    // Adjust zoom based on model scale and altitude for optimal visibility
     const modelScale = model.scale ?? MODEL_CONFIG.DEFAULT_SCALE
     const modelAltitude = model.altitude ?? MODEL_CONFIG.DEFAULT_ALTITUDE
     const scaleAdjustment = modelScale > 2 ? 1.0 : 0.5
     const altitudeAdjustment = modelAltitude > 20 ? 0.3 : 0
     const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
-    // Center on the marker coordinates with fixed 45-degree pitch
-    // Add padding to account for sidebar
     map.flyTo({
       center: markerCoordinates,
       zoom: targetZoom,
@@ -240,14 +221,33 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     if (selectedTouristSpot) {
       setIsTooltipVisible(false)
     } else {
-      // Only show tooltip if no other selections are active
       if (!selectedPlace && !selectedMunicipalityGeocode) {
         setIsTooltipVisible(true)
       }
     }
   }, [selectedTouristSpot, selectedPlace, selectedMunicipalityGeocode])
+  
+  // Show toast notification when municipality is selected
+  useEffect(() => {
+    if (selectedMunicipalityGeocode && filteredModels.length > 0) {
+      const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
+      const spotCount = filteredModels.length
+      toast.success(
+        `Showing ${spotCount} attraction${spotCount === 1 ? '' : 's'} in ${municipalityName}`,
+        {
+          duration: 3000,
+          icon: '📍',
+          style: {
+            background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            color: 'white',
+            fontWeight: '600'
+          }
+        }
+      )
+    }
+  }, [selectedMunicipalityGeocode, filteredModels.length])
 
-  // Initialize the map
+  // Initialize the map (keeping same initialization code)
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
@@ -255,7 +255,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     let loadingTimeout: ReturnType<typeof setTimeout> | null = null
 
     try {
-      // Get MapTiler API key from environment variables
       const apiKey = getMapTilerKey()
 
       mapInstance = new maplibregl.Map({
@@ -270,10 +269,8 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         canvasContextAttributes: { antialias: true }
       })
 
-      // Handle map errors
       mapInstance.on('error', (e) => {
         const errorMessage = `Map error: ${e.error?.message || 'Unknown error'}`
-        // Use proper error handling instead of console.error
         setError(errorMessage)
         setStoreError('map', errorMessage)
         setLoadingState('map', false)
@@ -285,7 +282,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         }
       })
 
-      // Handle successful load - ensure loading state is cleared
       mapInstance.once('load', () => {
         setIsLoading(false)
         setError(null)
@@ -296,7 +292,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         }
       })
       
-      // Update viewport state on map movement
       const updateViewport = () => {
         if (!mapInstance) return
         setMapViewport({
@@ -311,9 +306,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         mapInstance.on('moveend', updateViewport)
         mapInstance.on('zoomend', updateViewport)
         
-        // Handle map clicks for model interaction
         mapInstance.on('click', (e) => {
-          // Don't handle clicks on controls or UI elements
           const target = e.originalEvent?.target as HTMLElement
           if (target?.closest('.maplibregl-ctrl') || 
               target?.closest('.maplibregl-control-container') ||
@@ -322,31 +315,23 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
             return
           }
           
-          // Check if click is near any model coordinates
           const clickedLng = e.lngLat.lng
           const clickedLat = e.lngLat.lat
           
-          // Find nearest model within reasonable distance (rough check)
           for (const model of touristSpotModels) {
             const distance = calculateDistanceDegrees(
               [clickedLng, clickedLat],
               model.coordinates
             )
-            // If click is within threshold distance, consider it a hit
             if (distance < MAP_CONFIG.MODEL_CLICK_THRESHOLD && mapInstance) {
               setSelectedTouristSpot(model.id)
-              // Hide tooltip when a model is clicked
               setIsTooltipVisible(false)
-              // Fly to marker with 45-degree angle, centered on the model
-              // Adjust zoom based on model scale and altitude for optimal visibility
               const modelScale = model.scale ?? MODEL_CONFIG.DEFAULT_SCALE
               const modelAltitude = model.altitude ?? MODEL_CONFIG.DEFAULT_ALTITUDE
               const scaleAdjustment = modelScale > 2 ? 1.0 : 0.5
               const altitudeAdjustment = modelAltitude > 20 ? 0.3 : 0
               const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
-              // Center on model coordinates with fixed 45-degree pitch
-              // Add padding to account for sidebar and info card
               const padding = isSidebarOpen && !isMobile ? {
                 left: (window.innerWidth * 30) / 100 / 2,
                 right: 0,
@@ -369,18 +354,14 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         })
       }
 
-      // Fallback: clear loading state after a timeout if load event doesn't fire
       loadingTimeout = setTimeout(() => {
-        // Silently clear loading state if timeout occurs
         setIsLoading(false)
         loadingTimeout = null
       }, UI_CONFIG.LOADING_TIMEOUT)
 
-      // Add terrain sources and configuration after style loads
       mapInstance.once('style.load', () => {
         if (!mapInstance) return
         
-        // Add terrain source using MapTiler's terrain tiles
         if (!mapInstance.getSource('terrainSource')) {
           mapInstance.addSource('terrainSource', {
             type: 'raster-dem',
@@ -390,14 +371,11 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
           })
         }
 
-        // Load province GeoJSON and add white border outlines
         fetch('/CATANDUANES.geojson')
           .then(response => response.json())
           .then((provinceGeoJson) => {
             if (!mapInstance) return
 
-            // Merge Caramoran and Palumbanes Island into a single feature
-            // Find all Caramoran features (GEOCODE: "052004000")
             const caramoranFeatures: any[] = []
             const otherFeatures: any[] = []            
             provinceGeoJson.features.forEach((feature: any) => {
@@ -408,7 +386,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }
             })
 
-            // Combine all Caramoran polygons into a MultiPolygon
             let mergedCaramoran: any = null
             if (caramoranFeatures.length > 0) {
               const polygons: number[][][] = []
@@ -422,7 +399,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
                 }
               })
 
-              // Create merged feature with first feature's properties
               mergedCaramoran = {
                 type: 'Feature',
                 properties: caramoranFeatures[0].properties,
@@ -433,7 +409,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }
             }
 
-            // Create new feature collection with merged Caramoran
             const processedGeoJson: GeoJSON.FeatureCollection = {
               type: 'FeatureCollection',
               features: mergedCaramoran 
@@ -441,25 +416,21 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
                 : otherFeatures
             }
 
-            // Add the province boundaries source
             if (!mapInstance.getSource('provinceBoundaries')) {
               mapInstance.addSource('provinceBoundaries', {
                 type: 'geojson',
                 data: processedGeoJson
               })
             } else {
-              // Update existing source
               const source = mapInstance.getSource('provinceBoundaries')
               if (source && source.type === 'geojson') {
                 (source as maplibregl.GeoJSONSource).setData(processedGeoJson)
               }
             }
 
-            // Get layer insertion point
             const layers = mapInstance.getStyle().layers
             const firstSymbolLayerId = layers?.find(layer => layer.type === 'symbol')?.id
 
-            // Add invisible fill layer for hover detection
             if (!mapInstance.getLayer('provinceHoverLayer')) {
               mapInstance.addLayer({
                 id: 'provinceHoverLayer',
@@ -472,7 +443,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }, firstSymbolLayerId)
             }
 
-            // Add the province borders layer (white outlines) - invisible by default
             if (!mapInstance.getLayer('provinceBordersLayer')) {
               mapInstance.addLayer({
                 id: 'provinceBordersLayer',
@@ -481,32 +451,27 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
                 paint: {
                   'line-color': '#ffffff',
                   'line-width': 2,
-                  'line-opacity': 0 // Invisible by default, will be shown on hover
+                  'line-opacity': 0
                 },
-                filter: ['==', 'GEOCODE', ''] // Filter to show nothing by default
-              }, firstSymbolLayerId) // Insert before first symbol layer if it exists
+                filter: ['==', 'GEOCODE', '']
+              }, firstSymbolLayerId)
             }
 
-            // Track currently hovered municipality (using GEOCODE for consistency)
             let hoveredMunicipalityGeocode: string | null = null
 
-            // Helper function to hide borders
             const hideBorders = () => {
               if (!mapInstance) return
               hoveredMunicipalityGeocode = null
               mapInstance.setFilter('provinceBordersLayer', ['==', 'GEOCODE', ''])
               mapInstance.setPaintProperty('provinceBordersLayer', 'line-opacity', 0)
               mapInstance.getCanvas().style.cursor = ''
-              // Hide tooltip
               setHoveredMunicipalityName(null)
             }
 
-            // Helper function to show borders for a municipality
             const showBorders = (geocode: string, feature: any) => {
               if (!mapInstance) return
               hoveredMunicipalityGeocode = geocode
 
-              // Update filter to show only the hovered or selected municipality
               if (feature.properties.GEOCODE) {
                 mapInstance.setFilter('provinceBordersLayer', ['==', 'GEOCODE', geocode])
               } else {
@@ -515,7 +480,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               mapInstance.setPaintProperty('provinceBordersLayer', 'line-opacity', 1)
               mapInstance.getCanvas().style.cursor = 'pointer'
               
-              // Show tooltip with municipality name (only if tooltip is visible)
               if (isTooltipVisible) {
                 const municipalityName = MUNICIPALITY_NAMES[geocode]
                 if (municipalityName) {
@@ -524,26 +488,20 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }
             }
 
-            // Helper function to update borders based on current state
             const updateBordersForSelection = () => {
               if (!mapInstance) return
               const currentSelected = selectedMunicipalityRef.current
               if (currentSelected) {
-                // Keep selected municipality border visible
                 mapInstance.setFilter('provinceBordersLayer', ['==', 'GEOCODE', currentSelected])
                 mapInstance.setPaintProperty('provinceBordersLayer', 'line-opacity', 1)
               }
             }
 
-            // Handle mouse move to detect municipality hover
-            // Use global mousemove to ensure consistent behavior
             const handleMouseMove = (e: maplibregl.MapMouseEvent) => {
               if (!mapInstance) return
 
-              // Update mouse position for tooltip
               setMousePosition({ x: e.point.x, y: e.point.y })
 
-              // Check if we're over a municipality
               const features = mapInstance.queryRenderedFeatures(e.point, {
                 layers: ['provinceHoverLayer']
               })
@@ -551,17 +509,13 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               const hoveredFeature = features[0]
 
               if (hoveredFeature && hoveredFeature.properties) {
-                // Use GEOCODE for filtering (more reliable for merged features)
                 const municipalityGeocode = hoveredFeature.properties.GEOCODE || hoveredFeature.properties.OBJECTID?.toString()
 
-                // Only update if hovering a different municipality
                 if (hoveredMunicipalityGeocode !== municipalityGeocode) {
                   showBorders(municipalityGeocode, hoveredFeature)
                 }
               } else {
-                // No municipality under cursor
                 if (hoveredMunicipalityGeocode !== null) {
-                  // If a municipality is selected, keep its border visible
                   if (selectedMunicipalityRef.current) {
                     updateBordersForSelection()
                     hoveredMunicipalityGeocode = null
@@ -574,9 +528,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }
             }
 
-            // Handle mouse leave from the map to hide borders
             const handleMouseLeave = () => {
-              // If a municipality is selected, keep its border visible
               if (selectedMunicipalityRef.current) {
                 updateBordersForSelection()
                 hoveredMunicipalityGeocode = null
@@ -586,10 +538,8 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               }
             }
 
-            // Store GeoJSON for point-in-polygon checks
             setMunicipalityGeoJson(processedGeoJson)
 
-            // Handle click on municipality boundary
             const handleMunicipalityClick = (e: maplibregl.MapMouseEvent) => {
               if (!mapInstance) return
 
@@ -602,32 +552,24 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               if (clickedFeature && clickedFeature.properties) {
                 const municipalityGeocode = clickedFeature.properties.GEOCODE || clickedFeature.properties.OBJECTID?.toString()
 
-                // Always select the municipality when clicked
                 if (municipalityGeocode) {
                   setSelectedMunicipalityGeocode(municipalityGeocode)
                   selectedMunicipalityRef.current = municipalityGeocode
-                  // Update border to keep it visible
                   updateBordersForSelection()
-                  // Hide tooltip when clicked
                   setHoveredMunicipalityName(null)
                   setIsTooltipVisible(false)
                 }
               }
             }
 
-            // Store handlers for cleanup
             eventHandlersRef.current = {
               handleMouseMove,
               handleMouseLeave,
               handleMunicipalityClick
             }
 
-            // Add event listeners
-            // Use global mousemove for more reliable hover detection
             mapInstance.on('mousemove', handleMouseMove)
-            // Also listen to mouseleave on the layer as backup
             mapInstance.on('mouseleave', 'provinceHoverLayer', handleMouseLeave)
-            // Listen to mouseleave on the map canvas as well
             mapInstance.getCanvas().addEventListener('mouseleave', handleMouseLeave)
             mapInstance.on('click', 'provinceHoverLayer', handleMunicipalityClick)
           })
@@ -635,8 +577,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
             console.warn('Failed to load province boundaries:', error)
           })
 
-        // Enable terrain immediately if terrainEnabled is true and viewport is in Catanduanes
-        // This ensures terrain appears on initial load
         if (terrainEnabled && isViewportInCatanduanes(mapInstance)) {
           try {
             mapInstance.setTerrain({
@@ -644,7 +584,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               exaggeration: MAP_CONFIG.TERRAIN_EXAGGERATION
             })
           } catch (error) {
-            // Terrain source might not be ready yet, will be handled by useEffect
+            // Terrain source might not be ready yet
           }
         }
       })
@@ -653,14 +593,12 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       setMap(mapInstance)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to initialize map'
-      // Use proper error handling instead of console.error
       setError(errorMessage)
       setStoreError('map', errorMessage)
       toast.error(errorMessage)
       setIsLoading(false)
     }
 
-    // Handle window resize
     const handleResize = () => {
       if (mapInstance) {
         mapInstance.resize()
@@ -668,7 +606,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     }
     window.addEventListener('resize', handleResize)
 
-    // Cleanup function
     return () => {
       window.removeEventListener('resize', handleResize)
       if (loadingTimeout) {
@@ -676,14 +613,11 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         loadingTimeout = null
       }
       if (mapInstance) {
-        // Remove event listeners
         try {
           const handlers = eventHandlersRef.current
-          // Remove global mousemove listener
           if (handlers.handleMouseMove) {
             mapInstance.off('mousemove', handlers.handleMouseMove)
           }
-          // Remove layer-specific listeners
           if (mapInstance.getLayer('provinceHoverLayer')) {
             if (handlers.handleMouseLeave) {
               mapInstance.off('mouseleave', 'provinceHoverLayer', handlers.handleMouseLeave)
@@ -692,32 +626,28 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
               mapInstance.off('click', 'provinceHoverLayer', handlers.handleMunicipalityClick)
             }
           }
-          // Remove canvas mouseleave listener
           if (handlers.handleMouseLeave) {
             mapInstance.getCanvas().removeEventListener('mouseleave', handlers.handleMouseLeave)
           }
         } catch (e) {
-          // Layers might not exist, ignore
+          // Layers might not exist
         }
         mapInstance.remove()
         mapRef.current = null
         setMap(null)
-        // Clear handlers
         eventHandlersRef.current = {}
       }
     }
   }, [])
 
-  // Update terrain when terrainEnabled changes or map moves
+  // Update terrain when terrainEnabled changes
   useEffect(() => {
     if (!map || !map.isStyleLoaded()) return
     
     const updateTerrainState = () => {
       if (!map) return
       
-      // Check if terrain source exists
       if (!map.getSource('terrainSource')) {
-        // Wait for terrain source to be added
         return
       }
       
@@ -725,28 +655,24 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       const inCatanduanes = isViewportInCatanduanes(map)
 
       if (terrainEnabled && inCatanduanes && !hasTerrain) {
-        // Enable terrain when terrainEnabled is true and viewport is in Catanduanes
         try {
           map.setTerrain({
             source: 'terrainSource',
             exaggeration: MAP_CONFIG.TERRAIN_EXAGGERATION
           })
         } catch (error) {
-          // Terrain source might not be ready yet, ignore
+          // Terrain not ready
         }
       } else if ((!terrainEnabled || !inCatanduanes) && hasTerrain) {
-        // Disable terrain when terrainEnabled is false or viewport is outside Catanduanes
         map.setTerrain(null)
       }
     }
 
-    // Update immediately
     updateTerrainState()
 
-    // Also update on map movement and when data loads (terrain source might load later)
     map.on('moveend', updateTerrainState)
     map.on('zoomend', updateTerrainState)
-    map.on('data', updateTerrainState) // Trigger when new data (like terrain source) loads
+    map.on('data', updateTerrainState)
 
     return () => {
       map.off('moveend', updateTerrainState)
@@ -755,36 +681,17 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     }
   }, [map, terrainEnabled])
 
-  // Add all 3D models to the map using the reusable hook (only if models are enabled)
   useMap3DModels(modelsEnabled ? map : null, touristSpotModels)
 
-  // Update ref when state changes
   useEffect(() => {
     selectedMunicipalityRef.current = selectedMunicipalityGeocode
   }, [selectedMunicipalityGeocode])
 
-  // Determine which municipality's markers to show
-  // Show markers for:
-  // 1. The municipality border that was clicked (selectedMunicipalityGeocode)
-  // 2. OR the municipality of the currently selected place (selectedPlaceMunicipalityGeocode)
   const activeMarkersGeocode = selectedMunicipalityGeocode || selectedPlaceMunicipalityGeocode
 
-  // Filter models based on selected municipality
   const filteredModels = useMemo(() => {
-    // If no municipality is selected, show no markers
     if (!activeMarkersGeocode || !municipalityGeoJson) {
       return []
-    }
-
-    // Find ALL municipality features with the matching GEOCODE
-    // (Municipalities can have multiple polygons for different barangays/areas)
-    const isDev = import.meta.env.DEV
-    if (isDev) {
-      console.log('Available GEOCODEs in GeoJSON:', municipalityGeoJson.features.map(f => ({
-        geocode: f.properties?.GEOCODE || f.properties?.OBJECTID?.toString(),
-        name: f.properties?.MUNICIPALI || f.properties?.NAME || f.properties?.MUNICIPALITY || 'unknown'
-      })))
-      console.log('Looking for GEOCODE:', activeMarkersGeocode)
     }
 
     const municipalityFeatures = municipalityGeoJson.features.filter(
@@ -795,61 +702,29 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     )
 
     if (municipalityFeatures.length === 0) {
-      console.warn('Municipality features not found for GEOCODE:', activeMarkersGeocode)
-      if (isDev) {
-        console.log('Available features:', municipalityGeoJson.features.map(f => ({
-          geocode: f.properties?.GEOCODE || f.properties?.OBJECTID?.toString(),
-          municipality: f.properties?.MUNICIPALI || f.properties?.MUNICIPALITY,
-          properties: f.properties
-        })))
-      }
       return []
     }
 
-    if (isDev) {
-      console.log(`Found ${municipalityFeatures.length} municipality feature(s) for GEOCODE ${activeMarkersGeocode}`)
-    }
-
-    // Filter models that are within ANY of the municipality features using point-in-polygon
     const filtered = touristSpotModels.filter((model) => {
-      // Check if point is inside ANY of the municipality features
-      const isInside = municipalityFeatures.some((feature) => {
+      return municipalityFeatures.some((feature) => {
         return isPointInGeoJSONFeature(model.coordinates, feature)
       })
-
-      if (isDev) {
-        console.log(`Checking ${model.name || model.id} at [${model.coordinates[0]}, ${model.coordinates[1]}] for municipality ${activeMarkersGeocode}: ${isInside ? 'INSIDE' : 'OUTSIDE'}`)
-      }
-      return isInside
     })
-
-    if (isDev) {
-      console.log(`Found ${filtered.length} models in municipality ${activeMarkersGeocode}:`, filtered.map(m => m.name || m.id))
-    }
 
     return filtered
   }, [activeMarkersGeocode, municipalityGeoJson])
 
-  // Add circular markers with gradient at independent geographic coordinates
-  // Parameters: (map, models, onClick, [metersNorth, metersEast], verticalPixelOffset)
-  // Using 0 vertical offset so marker position is independent of camera zoom/angle
-  // Only show markers when a municipality is selected
   useMap3DMarkers(map, filteredModels, (modelId) => {
     setSelectedTouristSpot(modelId)
-    // Hide tooltip when a marker is clicked
     setIsTooltipVisible(false)
   }, [45, 25], 0)
 
-  // Add place markers from GeoJSON files
-  // Only show place markers when a municipality is selected or a place card is open
   usePlaceMarkers(map, activeMarkersGeocode, handlePlaceClick, handlePlaceHover)
 
-  // Resize map when container size changes (e.g., when sidebar toggles)
   useEffect(() => {
     if (!map || !mapContainer.current) return
 
     const resizeObserver = new ResizeObserver(() => {
-      // Use setTimeout to ensure the DOM has fully updated
       setTimeout(() => {
         if (map) {
           map.resize()
@@ -866,16 +741,37 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
 
   return (
     <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }}>
-      {/* Map container - always rendered so useEffect can access it */}
-      <div
-        ref={mapContainer}
-        className="w-full h-full"
-      />
+      <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Reset Camera Button */}
       <ResetCameraButton onClick={handleResetCamera} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
 
-      {/* Loading overlay */}
+      {/* Municipality Info Badge */}
+      {selectedMunicipalityGeocode && !isMobile && (
+        <MunicipalityInfoBadge
+          geocode={selectedMunicipalityGeocode}
+          touristSpotCount={filteredModels.length}
+          onViewInfo={() => setIsMunicipalityModalOpen(true)}
+          onClose={() => {
+            setSelectedMunicipalityGeocode(null)
+            selectedMunicipalityRef.current = null
+            setIsTooltipVisible(true)
+          }}
+        />
+      )}
+
+      {/* Municipality Info Modal */}
+      {isMunicipalityModalOpen && selectedMunicipalityGeocode && (
+        <MunicipalityInfoModal
+          geocode={selectedMunicipalityGeocode}
+          touristSpots={filteredModels}
+          onClose={() => setIsMunicipalityModalOpen(false)}
+          onSpotClick={(spotId) => {
+            setSelectedTouristSpot(spotId)
+            setIsTooltipVisible(false)
+          }}
+        />
+      )}
+
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90" style={{ zIndex: 1, pointerEvents: 'auto' }}>
           <div className="text-center">
@@ -885,7 +781,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         </div>
       )}
 
-      {/* Error overlay */}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90" style={{ zIndex: 1, pointerEvents: 'auto' }}>
           <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-lg">
@@ -901,7 +796,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         </div>
       )}
       
-      {/* Municipality Tooltip (Europa Universalis IV-style) - now with visibility control */}
       <MunicipalityTooltip 
         municipalityName={hoveredMunicipalityName}
         mouseX={mousePosition.x}
@@ -909,10 +803,8 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
         isVisible={isTooltipVisible}
       />
 
-      {/* Tourist Spot Info Panel */}
       <TouristSpotInfo spot={selectedSpot} map={map} onClose={handleCloseSpotInfo} />
 
-      {/* Place Info Panel */}
       {(hoveredPlace || selectedPlace) && (
         <PlaceInfo
           place={hoveredPlace || selectedPlace}
@@ -920,7 +812,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
           onClose={handleClosePlaceInfo}
         />
       )}
-
     </div>
   )
 }
