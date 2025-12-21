@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './styles/tailwind.css'
+import './styles/fonts.css'
 import { validateEnv } from './utils/envValidation'
 import './styles/markers.css'
 
