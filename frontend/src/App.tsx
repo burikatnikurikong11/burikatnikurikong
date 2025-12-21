@@ -92,10 +92,10 @@ export default function App(){
         overflow: 'hidden',
         margin: 0,
         padding: 0,
-        backgroundColor: 'var(--sunset-gold)'
+        backgroundColor: '#f5f7fa', // Light gray background like package tracking UI
       }}
     >
-      {/* Minimalist Sidebar - overlays everything */}
+      {/* Minimalist Sidebar - overlays everything on mobile, fixed column on desktop */}
       <MinimalistSidebar isOpen={isMinimalistSidebarOpen} onClose={() => setIsMinimalistSidebarOpen(false)} />
 
       {/* Menu Button (only visible on mobile) */}
@@ -104,15 +104,17 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Add left margin on desktop to account for always-visible icon bar (72px) */}
+        {/* Container with padding and gap for separated panels */}
         <div 
-          className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${!isMobile && isDiscoverPage && isItinerarySidebarOpen ? 'p-1 gap-1' : ''}`}
+          className={`h-full ${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '72px',
-            transition: 'margin-left 0.3s ease-out'
+            marginLeft: isMobile ? '0' : '72px', // Space for icon bar
+            padding: isMobile ? '0' : '16px',
+            gap: isMobile ? '0' : '16px',
+            transition: 'all 0.3s ease-out'
           }}
         >
-          {/* Itinerary Sidebar - Only show on Discover page */}
+          {/* Itinerary Sidebar - Center Panel (Package List equivalent) */}
           {isDiscoverPage && (
             <ItinerarySidebar
               isOpen={isItinerarySidebarOpen}
@@ -123,18 +125,21 @@ export default function App(){
             />
           )}
 
-          {/* Main Content Area */}
+          {/* Main Content Area - Map View (Right Panel) */}
           <div 
-            className={`h-full transition-all duration-300 ${!isMobile && isDiscoverPage && isItinerarySidebarOpen ? 'rounded-xl' : ''}`}
+            className="transition-all duration-300"
             style={{ 
               position: 'relative', 
               overflow: 'hidden',
               minWidth: 0,
               width: isMobile 
                 ? '100%' 
-                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 0.125rem)` : '100%'),
+                : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 8px)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : isMobile ? '100%' : '100%',
-              flexShrink: 0
+              flexShrink: 0,
+              borderRadius: isMobile ? '0' : '16px',
+              backgroundColor: 'white',
+              boxShadow: isMobile ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.08)',
             }}
           >
             <Suspense fallback={<div className="p-8 text-center pt-20">Loading...</div>}>
