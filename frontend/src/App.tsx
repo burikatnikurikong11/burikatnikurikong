@@ -5,7 +5,6 @@ import ErrorBoundary from './components/ErrorBoundary'
 import MinimalistSidebar from './components/MinimalistSidebar'
 import MenuButton from './components/MenuButton'
 import ItinerarySidebar from './components/ItinerarySidebar'
-import ChatBubbleButton from './components/ChatBubbleButton'
 import type { PlaceInfo } from './types/api'
 
 // Lazy load route components and heavy components for code splitting
@@ -34,13 +33,13 @@ export default function App(){
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Itinerary sidebar state (replaces chatbot sidebar)
+  // Itinerary sidebar state
   const [isItinerarySidebarOpen, setIsItinerarySidebarOpen] = useState(true)
   
-  // Chatbot modal state (for chat bubble)
+  // Chatbot state (now self-contained floating card)
   const [isChatbotOpen, setIsChatbotOpen] = useState(false)
   
-  // Minimalist menu sidebar state (always open on desktop, toggle on mobile)
+  // Minimalist menu sidebar state
   const [isMinimalistSidebarOpen, setIsMinimalistSidebarOpen] = useState(false)
 
   // Persist itinerary sidebar state to localStorage
@@ -102,32 +101,6 @@ export default function App(){
         <MenuButton onClick={toggleMinimalistSidebar} isOpen={isMinimalistSidebarOpen} />
       </div>
 
-      {/* Chatbot Modal (when chat bubble is clicked) */}
-      {isChatbotOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/50" 
-            onClick={() => setIsChatbotOpen(false)}
-          />
-          
-          {/* Chatbot Modal */}
-          <div 
-            className="relative w-full max-w-2xl h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
-            style={{ margin: '0 20px' }}
-          >
-            <Suspense fallback={<div className="p-8">Loading chatbot...</div>}>
-              <ChatBubble
-                onPlaceSelect={handlePlaceSelect}
-                isOpen={true}
-                onToggle={() => setIsChatbotOpen(false)}
-                isMobile={isMobile}
-              />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
       <ErrorBoundary>
         {/* Add left margin on desktop to account for always-visible icon bar (72px) */}
         <div 
@@ -170,9 +143,16 @@ export default function App(){
         </div>
       </ErrorBoundary>
 
-      {/* Chat Bubble Button - Only show on Discover page */}
+      {/* Floating Chatbot Card - Only show on Discover page */}
       {isDiscoverPage && (
-        <ChatBubbleButton onClick={toggleChatbot} />
+        <Suspense fallback={null}>
+          <ChatBubble
+            onPlaceSelect={handlePlaceSelect}
+            isOpen={isChatbotOpen}
+            onToggle={toggleChatbot}
+            isMobile={isMobile}
+          />
+        </Suspense>
       )}
 
       <ToastContainer />
