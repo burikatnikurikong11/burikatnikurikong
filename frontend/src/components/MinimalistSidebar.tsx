@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 interface MinimalistSidebarProps {
@@ -8,10 +8,12 @@ interface MinimalistSidebarProps {
 
 function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
   const location = useLocation()
+  const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   return (
     <>
-      {/* Backdrop overlay */}
+      {/* Backdrop overlay - only on mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-[1500] transition-opacity duration-300 md:hidden"
@@ -20,166 +22,233 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
         />
       )}
 
-      {/* Minimalist sidebar */}
+      {/* Main minimalist sidebar - collapsible icon bar */}
       <div
         className={`fixed top-0 left-0 h-full z-[1600] transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
+          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
         style={{
-          width: '280px',
+          width: '72px',
           backgroundColor: 'rgba(30, 35, 45, 0.98)',
           backdropFilter: 'blur(20px)',
           boxShadow: '4px 0 24px rgba(0, 0, 0, 0.15)',
         }}
       >
+        <div className="flex flex-col h-full items-center py-4">
+          {/* HapiHub Logo */}
+          <Link
+            to="/"
+            className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all hover:bg-white/10"
+            style={{ backgroundColor: 'var(--sunset-gold)' }}
+            title="HapiHub"
+          >
+            <span className="text-2xl">🗺️</span>
+          </Link>
+
+          {/* Navigation Icons */}
+          <nav className="flex flex-col items-center space-y-2 flex-1">
+            {/* Search Icon */}
+            <button
+              onClick={() => setIsSearchPanelOpen(!isSearchPanelOpen)}
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{
+                backgroundColor: isSearchPanelOpen ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                color: 'white',
+              }}
+              title="Search"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            {/* Guides Icon */}
+            <button
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{ color: 'white' }}
+              title="Guides"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </button>
+
+            {/* Directions Icon */}
+            <button
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{ color: 'white' }}
+              title="Directions"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            </button>
+
+            {/* Divider */}
+            <div className="w-8 my-2" style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+
+            {/* Recent Locations */}
+            <button
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              title="Caramoran"
+            >
+              <span className="text-lg">🏛️</span>
+            </button>
+
+            <button
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              title="Garchitorena"
+            >
+              <span className="text-lg">🏛️</span>
+            </button>
+
+            <button
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              title="Virac Point"
+            >
+              <span className="text-lg">📍</span>
+            </button>
+          </nav>
+
+          {/* Close button for mobile */}
+          <button
+            onClick={onClose}
+            className="md:hidden w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 mt-auto"
+            style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+            aria-label="Close sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Expandable Search Panel */}
+      <div
+        className={`fixed top-0 h-full z-[1550] transition-all duration-300 ease-out ${
+          isSearchPanelOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+        }`}
+        style={{
+          left: '72px',
+          width: '420px',
+          maxWidth: 'calc(100vw - 72px)',
+          backgroundColor: 'rgba(30, 35, 45, 0.98)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.15)',
+          pointerEvents: isSearchPanelOpen ? 'auto' : 'none',
+        }}
+      >
         <div className="flex flex-col h-full">
-          {/* Header with HapiHub title */}
+          {/* Search Header */}
           <div className="px-6 py-5 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <span
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--sunset-gold)' }}
-                >
-                  🗺️
-                </span>
-                HapiHub
-              </h1>
-              {/* Close button for mobile */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white">Search</h2>
               <button
-                onClick={onClose}
-                className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
+                onClick={() => setIsSearchPanelOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
                 style={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                aria-label="Close sidebar"
+                aria-label="Close search panel"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                <svg className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search HapiHub"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-12 py-3 rounded-xl border-2 transition-all focus:outline-none"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                }}
+              />
+            </div>
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {/* Search */}
-            <Link
-              to="/discover"
-              onClick={onClose}
-              className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all hover:bg-white/10"
-              style={{
-                backgroundColor: location.pathname === '/discover' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                color: 'white',
-              }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <span className="text-base font-medium">Search</span>
-            </Link>
-
-            {/* Itinerary */}
-            <button
-              className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all hover:bg-white/10"
-              style={{
-                color: 'white',
-              }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                />
-              </svg>
-              <span className="text-base font-medium">Itinerary</span>
-            </button>
-
-            {/* Guides */}
-            <button
-              className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all hover:bg-white/10"
-              style={{
-                color: 'white',
-              }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-              <span className="text-base font-medium">Guides</span>
-            </button>
-
-            {/* Divider */}
-            <div className="py-2">
-              <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
-            </div>
-
-            {/* Recents Section */}
-            <div className="pt-2">
-              <div className="flex items-center justify-between px-4 py-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                  Recents
-                </h3>
+          {/* Search Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {/* Recently Searched */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-white">Recently Searched</h3>
+                <button className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                  Clear
+                </button>
               </div>
-
-              {/* Recent items */}
-              <div className="space-y-1">
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all hover:bg-white/10"
-                  style={{ color: 'white' }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                  >
-                    🏛️
+              <div className="space-y-2">
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <svg className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.7)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-white font-medium">Puraran</p>
+                    <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Puraran, Baras</p>
                   </div>
-                  <span className="text-sm font-medium truncate">Caramoran</span>
                 </button>
-
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all hover:bg-white/10"
-                  style={{ color: 'white' }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                  >
-                    🏛️
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <svg className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.7)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-white font-medium">puraran</p>
+                    <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Baras</p>
                   </div>
-                  <span className="text-sm font-medium truncate">Garchitorena</span>
-                </button>
-
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all hover:bg-white/10"
-                  style={{ color: 'white' }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                  >
-                    📍
-                  </div>
-                  <span className="text-sm font-medium truncate">Virac Point</span>
                 </button>
               </div>
             </div>
-          </nav>
 
-          {/* Footer */}
-          <div className="px-6 py-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-            <p className="text-xs text-center" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-              Made with ❤️ for Catanduanes
-            </p>
+            {/* Find Nearby */}
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-3">Find Nearby</h3>
+              <div className="space-y-2">
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#FF8C00' }}>
+                    <span className="text-xl">🍴</span>
+                  </div>
+                  <p className="text-white font-medium">Restaurants</p>
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#9B59B6' }}>
+                    <span className="text-xl">🏨</span>
+                  </div>
+                  <p className="text-white font-medium">Hotels</p>
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#F1C40F' }}>
+                    <span className="text-xl">🏪</span>
+                  </div>
+                  <p className="text-white font-medium">Centers</p>
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3498DB' }}>
+                    <span className="text-xl">⛽</span>
+                  </div>
+                  <p className="text-white font-medium">Gas Stations</p>
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-left">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#E67E22' }}>
+                    <span className="text-xl">☕</span>
+                  </div>
+                  <p className="text-white font-medium">Coffee</p>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
