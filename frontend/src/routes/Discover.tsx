@@ -12,7 +12,6 @@ import { useStore } from '../state/store'
 import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
-import ItineraryButton from '../components/ItineraryButton'
 import ResetCameraButton from '../components/ResetCameraButton'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
@@ -112,12 +111,6 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
       essential: true
     })
   }, [map])
-
-  // Handle itinerary button click
-  const handleItineraryClick = useCallback(() => {
-    toast.success('Itinerary planner coming soon!')
-    // TODO: Open itinerary modal/sidebar
-  }, [])
 
   // Handle place selection and zoom
   const handlePlaceClick = useCallback((place: Place) => {
@@ -859,9 +852,6 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
 
       {/* Reset Camera Button */}
       <ResetCameraButton onClick={handleResetCamera} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
-
-      {/* Bookmark-style Itinerary Button */}
-      <ItineraryButton onClick={handleItineraryClick} count={0} />
 
       {/* Loading overlay */}
       {isLoading && (
