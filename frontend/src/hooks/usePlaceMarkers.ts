@@ -11,13 +11,22 @@ export function usePlaceMarkers(
   map: maplibregl.Map | null,
   selectedMunicipalityGeocode: string | null,
   onPlaceClick?: (place: Place) => void,
-  onPlaceHover?: (place: Place | null) => void
+  onPlaceHover?: (place: Place | null) => void,
+  filteredPlaces?: Place[] // Optional: if provided, use these instead of loading from files
 ) {
   const [places, setPlaces] = useState<Place[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const hoveredStateIdRef = useRef<string | null>(null)
 
+  // If filteredPlaces are provided, use them directly instead of loading from files
   useEffect(() => {
+    if (filteredPlaces !== undefined) {
+      console.log(`Using ${filteredPlaces.length} pre-filtered places`)
+      setPlaces(filteredPlaces)
+      return
+    }
+
+    // Otherwise, load from municipality files (original behavior)
     if (!selectedMunicipalityGeocode) {
       setPlaces([])
       return
@@ -55,7 +64,7 @@ export function usePlaceMarkers(
         setPlaces([])
         setIsLoading(false)
       })
-  }, [selectedMunicipalityGeocode])
+  }, [selectedMunicipalityGeocode, filteredPlaces])
 
   useEffect(() => {
     if (!map) return
@@ -167,14 +176,34 @@ export function usePlaceMarkers(
         return
       }
 
-      if (layerExists) {
-        console.log('Place markers layer already exists, skipping setup')
-        return
-      }
-
+      // Update existing source if it exists, otherwise create new layers
       if (sourceExists) {
-        console.log('Place markers source exists, cleaning up before re-adding')
-        cleanupLayers()
+        console.log(`Updating place markers with ${places.length} places`)
+        const geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+          type: 'FeatureCollection',
+          features: places.map((place) => ({
+            type: 'Feature',
+            id: place.id,
+            geometry: {
+              type: 'Point',
+              coordinates: place.coordinates,
+            },
+            properties: {
+              id: place.id,
+              name: place.name,
+              type: place.type,
+              description: place.description,
+              municipality: place.municipality,
+              image: place.image || '',
+            },
+          })),
+        }
+
+        const source = map.getSource(PLACE_SOURCE_ID) as maplibregl.GeoJSONSource
+        if (source) {
+          source.setData(geojson)
+        }
+        return
       }
 
       console.log(`Setting up place markers layer with ${places.length} places`)
@@ -261,7 +290,7 @@ export function usePlaceMarkers(
         map.on('mouseleave', PLACE_LAYER_ID, handleMouseLeave)
         map.on('click', PLACE_LAYER_ID, handleClick)
       } catch (e) {
-        console.error('Error setting up place markers:', e)
+        console.error('Error setting up place markers:', e):
       }
     }
 

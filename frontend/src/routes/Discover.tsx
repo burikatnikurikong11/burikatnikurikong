@@ -400,7 +400,7 @@ export default function Discover({
     })
   }, [selectedCategory])
 
-  // Initialize the map - REMOVED categoryFilteredModels from dependencies to prevent flickering
+  // Initialize the map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
@@ -786,7 +786,7 @@ export default function Discover({
         eventHandlersRef.current = {}
       }
     }
-  }, []) // FIXED: Empty dependency array prevents re-initialization
+  }, [])
 
   // Update terrain when terrainEnabled changes
   useEffect(() => {
@@ -899,8 +899,10 @@ export default function Discover({
     if (selectedMunicipalityGeocode && (filteredModels.length > 0 || filteredTouristSpots.length > 0)) {
       const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
       const totalCount = filteredModels.length + filteredTouristSpots.length
+      
+      const categoryInfo = selectedCategory ? ` (${selectedCategory})` : ''
       toast.success(
-        `Showing ${totalCount} attraction${totalCount === 1 ? '' : 's'} in ${municipalityName}`,
+        `Showing ${totalCount} attraction${totalCount === 1 ? '' : 's'}${categoryInfo} in ${municipalityName}`,
         {
           duration: 3000,
           icon: '📍',
@@ -912,14 +914,14 @@ export default function Discover({
         }
       )
     }
-  }, [selectedMunicipalityGeocode, filteredModels.length, filteredTouristSpots.length])
+  }, [selectedMunicipalityGeocode, filteredModels.length, filteredTouristSpots.length, selectedCategory])
 
   useMap3DMarkers(map, filteredModels, (modelId) => {
     setSelectedTouristSpot(modelId)
     setIsTooltipVisible(false)
   }, [45, 25], 0)
 
-  // Use filteredTouristSpots instead of relying on usePlaceMarkers
+  // Pass filtered tourist spots to usePlaceMarkers
   usePlaceMarkers(map, activeMarkersGeocode, handlePlaceClick, handlePlaceHover, filteredTouristSpots)
 
   useEffect(() => {
