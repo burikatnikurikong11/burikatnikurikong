@@ -45,11 +45,12 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           backdropFilter: 'blur(20px)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
           borderRadius: '16px',
+          overflow: 'hidden',
         }}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* HapiHub Logo / Toggle Button */}
-          <div className="px-4 py-4">
+          <div className="px-4 py-4 flex-shrink-0">
             <button
               onClick={toggleSidebar}
               className="w-full h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 relative group"
@@ -69,7 +70,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex flex-col space-y-2 flex-1 px-4 overflow-y-auto">
+          <nav className="flex flex-col space-y-2 flex-1 px-4 overflow-y-auto overflow-x-hidden">
             {/* Search Button with Tooltip */}
             <div className="relative group">
               <button
@@ -85,7 +86,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                {isSidebarExpanded && <span className="text-base font-medium">Search</span>}
+                {isSidebarExpanded && <span className="text-base font-medium truncate">Search</span>}
               </button>
               
               {/* Tooltip - only show when sidebar is collapsed */}
@@ -115,7 +116,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                {isSidebarExpanded && <span className="text-base font-medium">Guides</span>}
+                {isSidebarExpanded && <span className="text-base font-medium truncate">Guides</span>}
               </button>
               
               {!isSidebarExpanded && (
@@ -144,7 +145,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-                {isSidebarExpanded && <span className="text-base font-medium">Directions</span>}
+                {isSidebarExpanded && <span className="text-base font-medium truncate">Directions</span>}
               </button>
               
               {!isSidebarExpanded && (
@@ -185,7 +186,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
                 <span className="text-lg flex-shrink-0">🏛️</span>
-                {isSidebarExpanded && <span className="text-sm font-medium text-white">Caramoran</span>}
+                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Caramoran</span>}
               </button>
               
               {!isSidebarExpanded && (
@@ -211,7 +212,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
                 <span className="text-lg flex-shrink-0">🏛️</span>
-                {isSidebarExpanded && <span className="text-sm font-medium text-white">Garchitorena</span>}
+                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Garchitorena</span>}
               </button>
               
               {!isSidebarExpanded && (
@@ -237,7 +238,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
                 <span className="text-lg flex-shrink-0">📍</span>
-                {isSidebarExpanded && <span className="text-sm font-medium text-white">Virac Point</span>}
+                {isSidebarExpanded && <span className="text-sm font-medium text-white truncate">Virac Point</span>}
               </button>
               
               {!isSidebarExpanded && (
@@ -259,7 +260,7 @@ function MinimalistSidebar({ isOpen, onClose }: MinimalistSidebarProps) {
           {/* Close button for mobile */}
           <button
             onClick={onClose}
-            className="md:hidden mx-4 mb-4 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+            className="md:hidden mx-4 mb-4 h-12 rounded-xl flex items-center justify-center transition-all hover:bg-white/10 flex-shrink-0"
             style={{ color: 'rgba(255, 255, 255, 0.7)' }}
             aria-label="Close sidebar"
           >
