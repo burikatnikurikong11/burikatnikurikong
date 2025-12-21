@@ -22,10 +22,11 @@ import type { Place } from '../types/place'
 
 interface DiscoverProps {
   isSidebarOpen?: boolean
+  isMobile?: boolean
   onPlaceSelectFromAI?: (handler: (place: PlaceInfoType) => void) => void
 }
 
-export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }: DiscoverProps) {
+export default function Discover({ isSidebarOpen = false, isMobile = false, onPlaceSelectFromAI }: DiscoverProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const [map, setMap] = useState<maplibregl.Map | null>(null)
@@ -42,23 +43,6 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isTooltipVisible, setIsTooltipVisible] = useState(true) // Add visibility state
-  
-  // Detect mobile screen size
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768 // md breakpoint
-    }
-    return false
-  })
-
-  // Handle window resize for mobile detection
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
   
   // Store event handlers for cleanup
   const eventHandlersRef = useRef<{
@@ -82,6 +66,26 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   const selectedSpot = useMemo(() => {
     return touristSpotModels.find(m => m.id === selectedTouristSpot) || null
   }, [selectedTouristSpot])
+  
+  // Helper function to calculate padding for sidebar offset
+  const getPaddingForSidebar = useCallback(() => {
+    if (!map || isMobile || !isSidebarOpen) {
+      return { left: 0, right: 0, top: 0, bottom: 0 }
+    }
+    
+    // Calculate sidebar width (30% of window width)
+    const sidebarWidthPercent = 30
+    const windowWidth = window.innerWidth
+    const sidebarWidth = (windowWidth * sidebarWidthPercent) / 100
+    
+    // Add padding on the left to shift center point to the visible area
+    return {
+      left: sidebarWidth / 2, // Half of sidebar width to center in visible area
+      right: 0,
+      top: 0,
+      bottom: 0
+    }
+  }, [map, isMobile, isSidebarOpen])
   
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
@@ -131,15 +135,17 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     }
 
     // Zoom in, center on marker with 45-degree angle
+    // Add padding to account for sidebar
     map.flyTo({
       center: place.coordinates,
       zoom: 17,
       pitch: 45,
       bearing: 0,
+      padding: getPaddingForSidebar(),
       duration: ANIMATION_CONFIG.FLY_TO_DURATION,
       essential: true,
     })
-  }, [map])
+  }, [map, getPaddingForSidebar])
 
   // Handle place hover
   const handlePlaceHover = useCallback((place: Place | null) => {
@@ -205,15 +211,17 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
     const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
     // Center on the marker coordinates with fixed 45-degree pitch
+    // Add padding to account for sidebar
     map.flyTo({
       center: markerCoordinates,
       zoom: targetZoom,
       pitch: 45,
       bearing: MAP_CONFIG.DEFAULT_BEARING,
+      padding: getPaddingForSidebar(),
       duration: ANIMATION_CONFIG.FLY_TO_DURATION,
       essential: true
     })
-  }, [map, setSelectedTouristSpot])
+  }, [map, setSelectedTouristSpot, getPaddingForSidebar])
   
   // Expose the handler to parent component
   useEffect(() => {
@@ -333,11 +341,20 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
               const targetZoom = Math.max(19, ANIMATION_CONFIG.DEFAULT_ZOOM_ON_SELECT - scaleAdjustment - altitudeAdjustment)
 
               // Center on model coordinates with fixed 45-degree pitch
+              // Add padding to account for sidebar
+              const padding = isSidebarOpen && !isMobile ? {
+                left: (window.innerWidth * 30) / 100 / 2,
+                right: 0,
+                top: 0,
+                bottom: 0
+              } : { left: 0, right: 0, top: 0, bottom: 0 }
+
               mapInstance.flyTo({
                 center: model.coordinates,
                 zoom: targetZoom,
                 pitch: 45,
                 bearing: MAP_CONFIG.DEFAULT_BEARING,
+                padding: padding,
                 duration: ANIMATION_CONFIG.FLY_TO_DURATION,
                 essential: true
               })
