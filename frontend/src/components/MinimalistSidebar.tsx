@@ -21,6 +21,12 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
     }
   }
 
+  // Hide sidebar on home page
+  const isHomePage = location.pathname === '/'
+  if (isHomePage) {
+    return null
+  }
+
   return (
     <>
       {/* Backdrop overlay - only on mobile */}
@@ -59,12 +65,12 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
               title={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
               {isSidebarExpanded ? (
-                // HapiHub text with close button when expanded
+                // HapiHub text with close button when expanded - LARGER TEXT
                 <div className="flex items-center justify-between w-full">
-                  <span className="text-white font-bold text-xl" style={{ fontFamily: 'Tropika Island, sans-serif' }}>
+                  <span className="text-white font-bold text-2xl" style={{ fontFamily: 'Tropika Island, sans-serif' }}>
                     HapiHub
                   </span>
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </div>

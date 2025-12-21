@@ -51,12 +51,17 @@ function CategoryPills({
     }
   }
 
-  // Calculate right offset - position from right side of screen
+  // Calculate right offset - shift more to the left, and even more when itinerary expands
   const getRightOffset = () => {
     if (isMobile) return '1rem' // 16px from right on mobile
     
-    // Position 240px from right (more to the right than before)
-    return '240px'
+    // When itinerary is expanded, shift significantly more to the left
+    if (isItineraryExpanded) {
+      return '500px' // Much further left when expanded
+    }
+    
+    // Default position - moved more to the left (was 240px)
+    return '400px'
   }
 
   return (
