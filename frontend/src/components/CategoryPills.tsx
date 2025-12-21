@@ -70,12 +70,18 @@ function CategoryPills({
     return '280px'
   }
 
+  // Hide when itinerary is fully expanded (60%)
+  const isVisible = !isItineraryExpanded
+
   return (
     <div
       className="fixed z-[100] top-6 transition-all duration-300"
       style={{
         right: getRightOffset(),
         maxWidth: isMobile ? 'calc(100vw - 2rem)' : '800px',
+        opacity: isVisible ? 1 : 0,
+        pointerEvents: isVisible ? 'auto' : 'none',
+        transform: isVisible ? 'translateY(0)' : 'translateY(-10px)',
       }}
     >
       <div
