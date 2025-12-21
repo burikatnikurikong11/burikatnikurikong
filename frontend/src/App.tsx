@@ -33,8 +33,8 @@ export default function App(){
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Itinerary sidebar state
-  const [isItinerarySidebarOpen, setIsItinerarySidebarOpen] = useState(true)
+  // Itinerary sidebar state - Hidden by default on first load
+  const [isItinerarySidebarOpen, setIsItinerarySidebarOpen] = useState(false)
   const [isItineraryExpanded, setIsItineraryExpanded] = useState(false)
   
   // Chatbot state (now self-contained floating card)
@@ -47,13 +47,6 @@ export default function App(){
   useEffect(() => {
     localStorage.setItem('itinerarySidebarOpen', String(isItinerarySidebarOpen))
   }, [isItinerarySidebarOpen])
-
-  // Keep itinerary sidebar open on desktop by default
-  useEffect(() => {
-    if (isDiscoverPage && !isMobile) {
-      setIsItinerarySidebarOpen(true)
-    }
-  }, [isDiscoverPage, isMobile])
 
   // Ref to store the place selection handler from Discover component
   const placeSelectHandlerRef = useRef<((place: PlaceInfo) => void) | null>(null)
