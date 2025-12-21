@@ -120,7 +120,7 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
     return icons[type] || '📍'
   }
 
-  // Mobile: bottom sheet, Desktop: right sidebar
+  // Mobile: bottom sheet, Desktop: left sidebar
   if (isMobile) {
     return (
       <>
@@ -382,7 +382,7 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
     )
   }
 
-  // Desktop: Right Sidebar
+  // Desktop: Left Sidebar (changed from right)
   return (
     <div
       className={`h-full flex-shrink-0 ${
@@ -391,8 +391,8 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
       style={{
         width: isOpen ? 'calc(30% - 0.125rem)' : '0%',
         backgroundColor: 'var(--forest-green)',
-        borderLeft: isOpen ? '1px solid #e5e7eb' : 'none',
-        boxShadow: isOpen ? '-4px 0 12px rgba(0, 0, 0, 0.1)' : 'none',
+        borderRight: isOpen ? '1px solid #e5e7eb' : 'none', // Changed from borderLeft to borderRight
+        boxShadow: isOpen ? '4px 0 12px rgba(0, 0, 0, 0.1)' : 'none', // Changed shadow direction
         overflow: isOpen ? 'hidden' : 'hidden',
         minWidth: isOpen ? '350px' : '0px',
         maxWidth: isOpen ? '450px' : '0px'
@@ -616,4 +616,3 @@ function ChatBubble({ onPlaceSelect, isOpen, onToggle, isMobile = false }: ChatB
 }
 
 export default memo(ChatBubble)
-
