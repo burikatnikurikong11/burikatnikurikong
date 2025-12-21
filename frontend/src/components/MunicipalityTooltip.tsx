@@ -4,9 +4,10 @@ interface MunicipalityTooltipProps {
   municipalityName: string | null
   mouseX: number
   mouseY: number
+  isVisible?: boolean // Add visibility control prop
 }
 
-export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY }: MunicipalityTooltipProps) {
+export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, isVisible = true }: MunicipalityTooltipProps) {
   const [position, setPosition] = useState({ x: mouseX, y: mouseY })
 
   useEffect(() => {
@@ -14,7 +15,8 @@ export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY }
     setPosition({ x: mouseX, y: mouseY })
   }, [mouseX, mouseY])
 
-  if (!municipalityName) return null
+  // Don't render if not visible or no municipality name
+  if (!municipalityName || !isVisible) return null
 
   // Format municipality name (capitalize first letter of each word)
   const formattedName = municipalityName
