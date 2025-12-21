@@ -55,7 +55,7 @@ function CategoryPills({
   const getLeftOffset = () => {
     if (isMobile) return '1rem' // 16px from left on mobile
     
-    const minimalistSidebar = 92 // 72px (sidebar) + 20px (margins)
+    const minimalistSidebar = 80 // 72px (sidebar) + 8px (4px left gap + 4px right gap)
     const pillsHalfWidth = 400 // Half of pills container width (800px / 2)
     
     if (isSidebarOpen) {
