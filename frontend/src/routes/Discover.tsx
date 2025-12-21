@@ -44,6 +44,23 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isTooltipVisible, setIsTooltipVisible] = useState(true) // Add visibility state
   
+  // Detect mobile screen size
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 // md breakpoint
+    }
+    return false
+  })
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  
   // Store event handlers for cleanup
   const eventHandlersRef = useRef<{
     handleMouseMove?: (e: maplibregl.MapMouseEvent) => void
@@ -841,7 +858,7 @@ export default function Discover({ isSidebarOpen = false, onPlaceSelectFromAI }:
       />
 
       {/* Reset Camera Button */}
-      <ResetCameraButton onClick={handleResetCamera} />
+      <ResetCameraButton onClick={handleResetCamera} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
 
       {/* Bookmark-style Itinerary Button */}
       <ItineraryButton onClick={handleItineraryClick} count={0} />
