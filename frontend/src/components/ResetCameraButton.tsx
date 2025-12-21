@@ -1,12 +1,27 @@
 interface ResetCameraButtonProps {
   onClick: () => void
+  isSidebarOpen?: boolean
+  isMobile?: boolean
 }
 
-export default function ResetCameraButton({ onClick }: ResetCameraButtonProps) {
+export default function ResetCameraButton({ onClick, isSidebarOpen = false, isMobile = false }: ResetCameraButtonProps) {
+  // Calculate right position based on sidebar state
+  // On desktop: move left when sidebar is open (30% width sidebar)
+  // On mobile: stay in the same position (sidebar is bottom sheet)
+  const getRightPosition = () => {
+    if (isMobile) {
+      return 'right-4' // Stay at right-4 on mobile
+    }
+    if (isSidebarOpen) {
+      return 'right-[calc(30%+1rem)]' // Move left by sidebar width (30%) + 1rem spacing
+    }
+    return 'right-4' // Default position
+  }
+
   return (
     <button
       onClick={onClick}
-      className="fixed top-4 right-4 z-[1000] w-10 h-10 rounded-lg shadow-lg flex items-center justify-center transition-all duration-200 transform hover:scale-110 hover:shadow-xl bg-white/90 backdrop-blur-sm border border-gray-200"
+      className={`fixed top-4 z-[1000] w-10 h-10 rounded-lg shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:shadow-xl bg-white/90 backdrop-blur-sm border border-gray-200 ${getRightPosition()}`}
       aria-label="Reset camera to default view"
       title="Reset camera"
     >
