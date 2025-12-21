@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { ChevronRight, ChevronLeft, Maximize2, Minimize2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Maximize2, Minimize2, Map, FileText, MapPin, Search, Sparkles } from 'lucide-react'
 
 interface ItinerarySidebarProps {
   isOpen: boolean
@@ -46,7 +46,7 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
             >
-              <span className="text-2xl">🗺️</span>
+              <Map className="w-6 h-6 text-white" strokeWidth={2.5} />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">My Itinerary</h2>
@@ -133,7 +133,7 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
               className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
               style={{ backgroundColor: 'var(--sunset-gold)', opacity: 0.2 }}
             >
-              <span className="text-5xl">📝</span>
+              <FileText className="w-12 h-12" style={{ color: 'var(--sunset-gold)' }} strokeWidth={2} />
             </div>
             <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--forest-green)' }}>
               No Itinerary Yet
@@ -157,7 +157,9 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
               </h4>
               <div className="space-y-3 text-left">
                 <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
-                  <span className="text-xl flex-shrink-0">📍</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--forest-green)', opacity: 0.1 }}>
+                    <MapPin className="w-4 h-4" style={{ color: 'var(--forest-green)' }} strokeWidth={2.5} />
+                  </div>
                   <div>
                     <p className="text-sm font-medium" style={{ color: 'var(--forest-green)' }}>
                       Click on map markers
@@ -166,7 +168,9 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(3, 155, 229, 0.05)' }}>
-                  <span className="text-xl flex-shrink-0">🔍</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--ocean-blue)', opacity: 0.1 }}>
+                    <Search className="w-4 h-4" style={{ color: 'var(--ocean-blue)' }} strokeWidth={2.5} />
+                  </div>
                   <div>
                     <p className="text-sm font-medium" style={{ color: 'var(--ocean-blue)' }}>
                       Use the search
@@ -175,7 +179,9 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(244, 162, 89, 0.05)' }}>
-                  <span className="text-xl flex-shrink-0">🤖</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--sunset-gold)', opacity: 0.1 }}>
+                    <Sparkles className="w-4 h-4" style={{ color: 'var(--sunset-gold)' }} strokeWidth={2.5} />
+                  </div>
                   <div>
                     <p className="text-sm font-medium" style={{ color: 'var(--sunset-gold)' }}>
                       Ask HapiHub AI
