@@ -12,9 +12,7 @@ import { useStore } from '../state/store'
 import TouristSpotInfo from '../components/TouristSpotInfo'
 import PlaceInfo from '../components/PlaceInfo'
 import MunicipalityTooltip from '../components/MunicipalityTooltip'
-import MunicipalityInfoBadge from '../components/MunicipalityInfoBadge'
-import MunicipalityInfoModal from '../components/MunicipalityInfoModal'
-import ResetCameraButton from '../components/ResetCameraButton'
+import MapControls from '../components/MapControls'
 import { MAP_CONFIG, MODEL_CONFIG, ANIMATION_CONFIG, UI_CONFIG } from '../constants/map'
 import { calculateDistanceDegrees, isPointInGeoJSONFeature } from '../utils/coordinates'
 import toast from 'react-hot-toast'
@@ -40,9 +38,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const [hoveredPlace, setHoveredPlace] = useState<Place | null>(null)
   const [selectedPlaceMunicipalityGeocode, setSelectedPlaceMunicipalityGeocode] = useState<string | null>(null)
   const selectedMunicipalityRef = useRef<string | null>(null)
-  
-  // Municipality modal state
-  const [isMunicipalityModalOpen, setIsMunicipalityModalOpen] = useState(false)
   
   // Municipality tooltip state
   const [hoveredMunicipalityName, setHoveredMunicipalityName] = useState<string | null>(null)
@@ -106,7 +101,6 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     setHoveredPlace(null)
     setSelectedPlaceMunicipalityGeocode(null)
     setSelectedTouristSpot(null)
-    setIsMunicipalityModalOpen(false)
     selectedMunicipalityRef.current = null
     setIsTooltipVisible(true)
 
@@ -694,7 +688,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     return filtered
   }, [activeMarkersGeocode, municipalityGeoJson])
   
-  // Show toast notification when municipality is selected (MOVED AFTER filteredModels)
+  // Show toast notification when municipality is selected
   useEffect(() => {
     if (selectedMunicipalityGeocode && filteredModels.length > 0) {
       const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
@@ -743,34 +737,12 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
     <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }}>
       <div ref={mapContainer} className="w-full h-full" />
 
-      <ResetCameraButton onClick={handleResetCamera} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
-
-      {/* Municipality Info Badge */}
-      {selectedMunicipalityGeocode && !isMobile && (
-        <MunicipalityInfoBadge
-          geocode={selectedMunicipalityGeocode}
-          touristSpotCount={filteredModels.length}
-          onViewInfo={() => setIsMunicipalityModalOpen(true)}
-          onClose={() => {
-            setSelectedMunicipalityGeocode(null)
-            selectedMunicipalityRef.current = null
-            setIsTooltipVisible(true)
-          }}
-        />
-      )}
-
-      {/* Municipality Info Modal */}
-      {isMunicipalityModalOpen && selectedMunicipalityGeocode && (
-        <MunicipalityInfoModal
-          geocode={selectedMunicipalityGeocode}
-          touristSpots={filteredModels}
-          onClose={() => setIsMunicipalityModalOpen(false)}
-          onSpotClick={(spotId) => {
-            setSelectedTouristSpot(spotId)
-            setIsTooltipVisible(false)
-          }}
-        />
-      )}
+      {/* Map Controls (Map Style, Current Location, Reset Camera) */}
+      <MapControls 
+        onResetCamera={handleResetCamera}
+        isSidebarOpen={isSidebarOpen}
+        isMobile={isMobile}
+      />
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90" style={{ zIndex: 1, pointerEvents: 'auto' }}>
