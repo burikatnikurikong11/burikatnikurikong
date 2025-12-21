@@ -82,7 +82,8 @@ export default function App(){
 
       <ErrorBoundary>
         {/* Mobile: flex-col (map on top, sidebar bottom sheet), Desktop: flex-row (sidebar on left, map on right) */}
-        <div className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${isMobile ? '' : 'p-1 gap-1'}`}>
+        {/* Only add padding and gap when sidebar is open on desktop */}
+        <div className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} ${!isMobile && isDiscoverPage && isSidebarOpen ? 'p-1 gap-1' : ''}`}>
           {/* Pathfinder AI Sidebar/Bottom Sheet - Only show on Discover page - NOW ON LEFT */}
           {isDiscoverPage && (
             <Suspense fallback={null}>
@@ -97,7 +98,7 @@ export default function App(){
 
           {/* Main Content Area */}
           <div 
-            className={`h-full transition-all duration-300 ${isMobile ? '' : 'rounded-xl'}`}
+            className={`h-full transition-all duration-300 ${!isMobile && isDiscoverPage && isSidebarOpen ? 'rounded-xl' : ''}`}
             style={{ 
               position: 'relative', 
               overflow: 'hidden',
