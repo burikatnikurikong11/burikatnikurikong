@@ -751,8 +751,8 @@ export default function Discover({
   }, [map])
 
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }}>
-      <div ref={mapContainer} className="w-full h-full" />
+    <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0, overflow: 'hidden', borderRadius: isMobile ? '0' : '16px' }}>
+      <div ref={mapContainer} className="w-full h-full" style={{ borderRadius: isMobile ? '0' : '16px' }} />
 
       {/* Category Filter Pills */}
       <CategoryPills
