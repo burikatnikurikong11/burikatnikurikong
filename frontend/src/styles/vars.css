@@ -1,0 +1,30 @@
+:root{
+  /* HapiHub Color Palette */
+  --forest-green: #2D5F3F;
+  --sunset-gold: #F4A259;
+  --ocean-blue: #4A90A4;
+  --gray: #6B7280;
+  --light-gray: #E5E7EB;
+
+  /* Legacy variables mapped to new palette */
+  --bg: #f7f7fb;
+  --fg: #0f172a;
+  --primary: #2D5F3F; /* Forest Green */
+  --muted: #6B7280; /* Gray */
+  --accent: #4A90A4; /* Ocean Blue */
+
+  /* Backward compatibility */
+  --seafoam-blue: #4A90A4;
+  --sunlit-gold: #F4A259;
+  --coral-pink: #F4A259;
+  --sandy-beige: #E8D2AE;
+}
+/* Dark mode tokens */
+.dark {
+  --bg: #071023;
+  --fg: #e6eef6;
+  --primary: #2D5F3F; /* Forest Green */
+  --muted: #9CA3AF; /* Light Gray */
+  --accent: #4A90A4; /* Ocean Blue */
+}
+
