@@ -226,28 +226,8 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       }
     }
   }, [selectedTouristSpot, selectedPlace, selectedMunicipalityGeocode])
-  
-  // Show toast notification when municipality is selected
-  useEffect(() => {
-    if (selectedMunicipalityGeocode && filteredModels.length > 0) {
-      const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
-      const spotCount = filteredModels.length
-      toast.success(
-        `Showing ${spotCount} attraction${spotCount === 1 ? '' : 's'} in ${municipalityName}`,
-        {
-          duration: 3000,
-          icon: '📍',
-          style: {
-            background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
-            color: 'white',
-            fontWeight: '600'
-          }
-        }
-      )
-    }
-  }, [selectedMunicipalityGeocode, filteredModels.length])
 
-  // Initialize the map (keeping same initialization code)
+  // Initialize the map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
@@ -713,6 +693,26 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
 
     return filtered
   }, [activeMarkersGeocode, municipalityGeoJson])
+  
+  // Show toast notification when municipality is selected (MOVED AFTER filteredModels)
+  useEffect(() => {
+    if (selectedMunicipalityGeocode && filteredModels.length > 0) {
+      const municipalityName = MUNICIPALITY_NAMES[selectedMunicipalityGeocode] || 'Unknown'
+      const spotCount = filteredModels.length
+      toast.success(
+        `Showing ${spotCount} attraction${spotCount === 1 ? '' : 's'} in ${municipalityName}`,
+        {
+          duration: 3000,
+          icon: '📍',
+          style: {
+            background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            color: 'white',
+            fontWeight: '600'
+          }
+        }
+      )
+    }
+  }, [selectedMunicipalityGeocode, filteredModels.length])
 
   useMap3DMarkers(map, filteredModels, (modelId) => {
     setSelectedTouristSpot(modelId)
