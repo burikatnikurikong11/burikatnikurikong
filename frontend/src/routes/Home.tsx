@@ -65,7 +65,7 @@ export default function Home(){
               ✨ Next-Gen Travel Experience
             </span>
           </div>
-          <h1 className="text-7xl md:text-8xl font-black mb-6 text-white leading-tight">
+          <h1 className="text-7xl md:text-8xl font-black mb-6 text-white leading-tight tropika-font">
             HapiHub
           </h1>
           <p className="text-2xl md:text-3xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed font-light">
@@ -134,4 +134,3 @@ export default function Home(){
     </div>
   )
 }
-

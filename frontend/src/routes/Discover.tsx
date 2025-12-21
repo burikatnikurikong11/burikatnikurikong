@@ -49,6 +49,7 @@ export default function Discover({
   const [selectedPlaceMunicipalityGeocode, setSelectedPlaceMunicipalityGeocode] = useState<string | null>(null)
   const selectedMunicipalityRef = useRef<string | null>(null)
   const [mapStyle, setMapStyle] = useState<MapStyle>('satellite')
+  const [isMapStyleOpen, setIsMapStyleOpen] = useState(false)
   
   // Category filter state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -222,6 +223,11 @@ export default function Discover({
       }
     })
   }, [map, municipalityGeoJson, terrainEnabled])
+
+  // Toggle map style switcher
+  const handleToggleMapStyle = useCallback(() => {
+    setIsMapStyleOpen(!isMapStyleOpen)
+  }, [isMapStyleOpen])
 
   // Handle place selection and zoom
   const handlePlaceClick = useCallback((place: Place) => {
@@ -860,11 +866,14 @@ export default function Discover({
         currentStyle={mapStyle}
         onStyleChange={handleMapStyleChange}
         isMobile={isMobile}
+        isOpen={isMapStyleOpen}
+        onClose={() => setIsMapStyleOpen(false)}
       />
 
-      {/* Map Controls (Current Location, Reset Camera) */}
+      {/* Map Controls (Map Style Toggle, Current Location, Reset Camera) */}
       <MapControls 
         onResetCamera={handleResetCamera}
+        onToggleMapStyle={handleToggleMapStyle}
         isSidebarOpen={isSidebarOpen}
         isMobile={isMobile}
       />
