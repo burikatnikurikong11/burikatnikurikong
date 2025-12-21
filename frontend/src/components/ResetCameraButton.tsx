@@ -5,17 +5,11 @@ interface ResetCameraButtonProps {
 }
 
 export default function ResetCameraButton({ onClick, isSidebarOpen = false, isMobile = false }: ResetCameraButtonProps) {
-  // Calculate right position based on sidebar state
-  // On desktop: move left when sidebar is open (30% width sidebar)
-  // On mobile: stay in the same position (sidebar is bottom sheet)
+  // Calculate right position - button stays on the right side
+  // On desktop: stays at right-4 regardless of sidebar state (sidebar is now on left)
+  // On mobile: stays at right-4 (sidebar is bottom sheet)
   const getRightPosition = () => {
-    if (isMobile) {
-      return 'right-4' // Stay at right-4 on mobile
-    }
-    if (isSidebarOpen) {
-      return 'right-[calc(30%+1rem)]' // Move left by sidebar width (30%) + 1rem spacing
-    }
-    return 'right-4' // Default position
+    return 'right-4' // Always stay at right-4 since sidebar is now on the left
   }
 
   return (
