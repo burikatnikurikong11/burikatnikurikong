@@ -9,23 +9,52 @@ interface ItinerarySidebarProps {
 function ItinerarySidebar({ isOpen, onToggle, isMobile }: ItinerarySidebarProps) {
   return (
     <>
-      {/* Desktop: Left sidebar, Mobile: Bottom sheet */}
+      {/* Desktop: Left sidebar with collapse button, Mobile: Bottom sheet */}
       <div
         className={`
           ${isMobile ? 'fixed bottom-0 left-0 right-0' : 'relative h-full'}
           ${isMobile && !isOpen ? 'translate-y-full' : ''}
+          ${!isMobile && !isOpen ? 'translate-x-[-100%]' : ''}
           transition-all duration-300 ease-out
           bg-white shadow-2xl
           ${isMobile ? 'rounded-t-3xl' : 'rounded-xl'}
           overflow-hidden
         `}
         style={{
-          width: isMobile ? '100%' : 'calc(30% - 0.125rem)',
+          width: isMobile ? '100%' : isOpen ? 'calc(30% - 0.125rem)' : '0',
           height: isMobile ? '50%' : '100%',
           zIndex: isMobile ? 1000 : 'auto',
           flexShrink: 0,
+          minWidth: !isMobile && isOpen ? '350px' : '0',
+          maxWidth: !isMobile && isOpen ? '450px' : '0',
         }}
       >
+        {/* Collapse/Expand Button - Desktop Only, positioned on right edge */}
+        {!isMobile && (
+          <button
+            onClick={onToggle}
+            className="absolute top-1/2 -right-10 transform -translate-y-1/2 z-10
+                       w-10 h-24 rounded-r-xl flex items-center justify-center
+                       transition-all duration-300 hover:w-12 group
+                       shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            }}
+            aria-label={isOpen ? 'Collapse itinerary' : 'Expand itinerary'}
+          >
+            <svg
+              className={`w-6 h-6 text-white transition-transform duration-300 ${
+                isOpen ? 'rotate-180' : 'rotate-0'
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+
         {/* Header */}
         <div
           className="px-6 py-4 border-b flex items-center justify-between"
@@ -121,7 +150,7 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile }: ItinerarySidebarProps)
                   <span className="text-xl flex-shrink-0">🤖</span>
                   <div>
                     <p className="text-sm font-medium" style={{ color: 'var(--sunset-gold)' }}>
-                      Ask Pathfinder AI
+                      Ask HapiHub AI
                     </p>
                     <p className="text-xs text-gray-600">Get personalized recommendations from our AI assistant</p>
                   </div>
