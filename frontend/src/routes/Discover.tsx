@@ -789,7 +789,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
 
     const municipalityFeatures = municipalityGeoJson.features.filter(
       (feature) => {
-        const geocode = f.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
+        const geocode = feature.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
         return geocode === activeMarkersGeocode
       }
     )
