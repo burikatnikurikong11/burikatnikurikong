@@ -108,20 +108,20 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Container with consistent 4px gaps matching margins */}
-        {/* Desktop: positioned beside sidebar with correct width to prevent scrollbars */}
+        {/* Container with uniform 4px gaps on all sides */}
+        {/* Desktop: positioned beside sidebar with correct width */}
         <div 
           className={`${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '92px', // Space for floating sidebar (72px + 20px margins)
+            marginLeft: isMobile ? '0' : '80px', // 72px (sidebar width) + 8px (4px left gap + 4px right gap)
             marginTop: isMobile ? '0' : '4px',
             marginBottom: isMobile ? '0' : '4px',
             marginRight: isMobile ? '0' : '4px',
             gap: isMobile ? '0' : '4px', // Consistent 4px gap matching all margins
-            width: isMobile ? '100vw' : 'calc(100vw - 92px - 8px)', // Full width minus sidebar space and margins
+            width: isMobile ? '100vw' : 'calc(100vw - 80px - 8px)', // Full width minus sidebar space and margins
             height: isMobile ? '100vh' : 'calc(100vh - 8px)', // Full height minus top/bottom margins
             transition: 'all 0.3s ease-out',
-            overflow: 'visible', // Changed from hidden to visible to show rounded corners
+            overflow: 'visible',
           }}
         >
           {/* Itinerary Sidebar - Left Panel (starts beside the floating sidebar) */}
@@ -147,7 +147,7 @@ export default function App(){
                 : (isDiscoverPage && isItinerarySidebarOpen ? `calc(${mapWidth} - 2px)` : '100%'),
               height: isMobile && isDiscoverPage && isItinerarySidebarOpen ? '50%' : '100%',
               flexShrink: 0,
-              borderRadius: isMobile ? '0' : '16px', // 16px border radius on all corners
+              borderRadius: isMobile ? '0' : '16px',
               backgroundColor: 'white',
               boxShadow: isMobile ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.08)',
             }}
