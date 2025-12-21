@@ -94,8 +94,8 @@ function CategoryPills({
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
               className="
-                flex items-center gap-2 px-4 py-2.5 rounded-full
-                font-medium text-sm transition-all duration-200
+                flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                font-medium text-xs transition-all duration-200
                 whitespace-nowrap flex-shrink-0
               "
               style={{
@@ -110,7 +110,7 @@ function CategoryPills({
               aria-pressed={isActive}
             >
               <Icon 
-                className="w-4 h-4" 
+                className="w-3.5 h-3.5" 
                 style={{ 
                   color: isActive ? category.color : '#71717a',
                   strokeWidth: isActive ? 2.5 : 2 
