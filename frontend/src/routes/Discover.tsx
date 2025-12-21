@@ -101,10 +101,12 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
   const handleResetCamera = useCallback(() => {
     if (!map) return
 
-    // Clear all selections
+    // Clear all selections and close info cards
     setSelectedMunicipalityGeocode(null)
     setSelectedPlace(null)
+    setHoveredPlace(null)
     setSelectedPlaceMunicipalityGeocode(null)
+    setSelectedTouristSpot(null) // Close tourist spot info card
     selectedMunicipalityRef.current = null
     // Re-enable tooltip when resetting
     setIsTooltipVisible(true)
@@ -117,7 +119,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
       duration: ANIMATION_CONFIG.FLY_TO_DURATION,
       essential: true
     })
-  }, [map])
+  }, [map, setSelectedTouristSpot])
 
   // Handle place selection and zoom
   const handlePlaceClick = useCallback((place: Place) => {
@@ -787,7 +789,7 @@ export default function Discover({ isSidebarOpen = false, isMobile = false, onPl
 
     const municipalityFeatures = municipalityGeoJson.features.filter(
       (feature) => {
-        const geocode = feature.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
+        const geocode = f.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
         return geocode === activeMarkersGeocode
       }
     )
