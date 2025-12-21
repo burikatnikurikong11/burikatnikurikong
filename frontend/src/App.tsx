@@ -118,11 +118,11 @@ export default function App(){
             </Suspense>
           </div>
 
-          {/* Toggle Button - Only show on Discover page when sidebar is closed (desktop only) - NOW ON LEFT */}
+          {/* Toggle Button - Only show on Discover page when sidebar is closed (desktop only) - NOW ON RIGHT */}
           {isDiscoverPage && !isSidebarOpen && !isMobile && (
             <button
               onClick={toggleSidebar}
-              className="fixed bottom-6 left-6 z-[9999] w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110"
+              className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110"
               style={{
                 backgroundColor: 'transparent',
                 border: 'none'
