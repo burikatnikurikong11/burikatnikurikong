@@ -51,24 +51,22 @@ function CategoryPills({
     }
   }
 
-  // Calculate right offset - shift more to the left, and even more when itinerary expands
+  // Calculate right offset - stay within map panel, shift when itinerary expands
   const getRightOffset = () => {
     if (isMobile) return '1rem' // 16px from right on mobile
     
-    // When itinerary is expanded, shift significantly more to the left
+    // When itinerary is expanded, shift left to stay visible on map
     if (isItineraryExpanded) {
-      return '500px' // Much further left when expanded
+      return '360px' // Adjusted to stay within map boundaries
     }
     
-    // Default position - moved more to the left (was 240px)
-    return '400px'
+    // Default position - positioned to stay within map panel
+    return '280px'
   }
 
   return (
     <div
-      className={`fixed z-[100] top-6 transition-all duration-300 ${
-        isItineraryExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
-      }`}
+      className="fixed z-[100] top-6 transition-all duration-300"
       style={{
         right: getRightOffset(),
         maxWidth: isMobile ? 'calc(100vw - 2rem)' : '800px',
