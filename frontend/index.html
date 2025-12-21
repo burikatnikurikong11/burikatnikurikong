@@ -3,19 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HapiHub</title>
+    <title>HapiHub - Catanduanes Tourism</title>
+    <meta name="description" content="Explore Catanduanes with immersive 3D maps and intelligent travel planning. Discover tourist spots, plan routes, and get AI-powered recommendations." />
+    <meta property="og:title" content="HapiHub - Catanduanes Tourism" />
     <meta property="og:description" content="Explore Catanduanes with immersive 3D maps and intelligent travel planning." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#10b981" />
 
-    <!-- Preconnect to external APIs -->
+    <!-- Preconnect to external APIs for faster DNS resolution -->
     <link rel="preconnect" href="https://api.maptiler.com" crossorigin>
     <link rel="dns-prefetch" href="https://api.maptiler.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
 
-    <!-- Preload critical assets -->
+    <!-- Preload critical resources -->
     <link rel="modulepreload" href="/src/main.tsx">
     <link rel="preload" href="/CATANDUANES.geojson" as="fetch" type="application/json" crossorigin>
+    
+    <!-- Preload critical fonts (if you have custom fonts) -->
+    <!-- <link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin> -->
+
+    <!-- PWA support -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <!-- Performance hint: prefetch likely next pages -->
+    <link rel="prefetch" href="/discover">
 </head>
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Optional: Add structured data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "HapiHub",
+      "description": "Tourism and travel planning application for Catanduanes",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 </body>
 </html>
