@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { ChevronRight, ChevronLeft } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Maximize2, Minimize2 } from 'lucide-react'
 
 interface ItinerarySidebarProps {
   isOpen: boolean
@@ -30,58 +30,12 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
           minWidth: !isMobile && isOpen ? (isExpanded ? '600px' : '350px') : '0',
           maxWidth: !isMobile && isOpen ? (isExpanded ? '900px' : '450px') : '0',
           boxShadow: isMobile ? '0 -4px 20px rgba(0, 0, 0, 0.08)' : isOpen ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
+          position: 'relative',
         }}
       >
-        {/* Collapse/Expand Button - Desktop Only, positioned on right edge */}
-        {!isMobile && (
-          <button
-            onClick={onToggle}
-            className="absolute top-1/2 -right-10 transform -translate-y-1/2 z-10
-                       w-10 h-24 rounded-r-xl flex items-center justify-center
-                       transition-all duration-300 hover:w-12 group
-                       shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
-            }}
-            aria-label={isOpen ? 'Collapse itinerary' : 'Expand itinerary'}
-          >
-            <svg
-              className={`w-6 h-6 text-white transition-transform duration-300 ${
-                isOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        )}
-
-        {/* Expand/Compress Button - Desktop Only, positioned below collapse button */}
-        {!isMobile && isOpen && onToggleExpanded && (
-          <button
-            onClick={onToggleExpanded}
-            className="absolute top-1/2 -right-10 transform translate-y-16 z-10
-                       w-10 h-20 rounded-r-xl flex items-center justify-center
-                       transition-all duration-300 hover:w-12 group
-                       shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-            }}
-            aria-label={isExpanded ? 'Compress panel' : 'Expand panel'}
-          >
-            {isExpanded ? (
-              <ChevronLeft className="w-6 h-6 text-white" strokeWidth={2.5} />
-            ) : (
-              <ChevronRight className="w-6 h-6 text-white" strokeWidth={2.5} />
-            )}
-          </button>
-        )}
-
         {/* Header */}
         <div
-          className="px-6 py-4 border-b flex items-center justify-between"
+          className="px-6 py-4 border-b flex items-center justify-between relative"
           style={{
             background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
             borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -99,6 +53,39 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
               <p className="text-xs text-white/80">Plan your Catanduanes adventure</p>
             </div>
           </div>
+
+          {/* Control buttons - Desktop only, inside panel at top-right */}
+          {!isMobile && isOpen && (
+            <div className="flex items-center gap-2">
+              {/* Expand/Compress Button */}
+              {onToggleExpanded && (
+                <button
+                  onClick={onToggleExpanded}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:bg-white/20"
+                  style={{ color: 'white' }}
+                  aria-label={isExpanded ? 'Compress panel' : 'Expand panel'}
+                  title={isExpanded ? 'Compress panel' : 'Expand panel'}
+                >
+                  {isExpanded ? (
+                    <Minimize2 className="w-5 h-5" strokeWidth={2.5} />
+                  ) : (
+                    <Maximize2 className="w-5 h-5" strokeWidth={2.5} />
+                  )}
+                </button>
+              )}
+              
+              {/* Collapse Button */}
+              <button
+                onClick={onToggle}
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:bg-white/20"
+                style={{ color: 'white' }}
+                aria-label="Collapse itinerary"
+                title="Collapse itinerary"
+              >
+                <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
 
           {/* Toggle button for mobile */}
           {isMobile && (
@@ -120,6 +107,23 @@ function ItinerarySidebar({ isOpen, onToggle, isMobile, isExpanded = false, onTo
             </button>
           )}
         </div>
+
+        {/* Floating Expand Button - When Panel is Closed (Desktop Only) */}
+        {!isMobile && !isOpen && (
+          <button
+            onClick={onToggle}
+            className="absolute top-1/2 -right-10 transform -translate-y-1/2 z-10
+                       w-10 h-24 rounded-r-xl flex items-center justify-center
+                       transition-all duration-300 hover:w-12 group
+                       shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, var(--forest-green) 0%, var(--ocean-blue) 100%)',
+            }}
+            aria-label="Expand itinerary"
+          >
+            <ChevronRight className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </button>
+        )}
 
         {/* Content */}
         <div className="h-[calc(100%-80px)] overflow-y-auto">
