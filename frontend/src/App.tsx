@@ -95,7 +95,7 @@ export default function App(){
         backgroundColor: '#f5f7fa', // Light gray background like package tracking UI
       }}
     >
-      {/* Minimalist Sidebar - overlays everything on mobile, fixed column on desktop */}
+      {/* Minimalist Sidebar - overlays everything on mobile and desktop (z-index 1600) */}
       <MinimalistSidebar isOpen={isMinimalistSidebarOpen} onClose={() => setIsMinimalistSidebarOpen(false)} />
 
       {/* Menu Button (only visible on mobile) */}
@@ -104,20 +104,18 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Container with padding and gap for separated panels */}
+        {/* Container with padding and gap for separated panels - NO marginLeft */}
         <div 
           className={`${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '88px', // Space for floating icon bar (72px + 16px)
             padding: isMobile ? '0' : '16px',
-            paddingLeft: isMobile ? '0' : '0', // No left padding since we have margin
             gap: isMobile ? '0' : '16px',
             height: isMobile ? '100vh' : 'calc(100vh - 32px)', // Full height minus padding
             transition: 'all 0.3s ease-out',
             overflow: 'hidden'
           }}
         >
-          {/* Itinerary Sidebar - Center Panel (Package List equivalent) */}
+          {/* Itinerary Sidebar - Left Panel (starts from left edge, sidebar overlays on top) */}
           {isDiscoverPage && (
             <ItinerarySidebar
               isOpen={isItinerarySidebarOpen}
