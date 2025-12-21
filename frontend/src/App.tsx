@@ -104,16 +104,18 @@ export default function App(){
       </div>
 
       <ErrorBoundary>
-        {/* Container with padding and gap for separated panels */}
-        {/* Desktop: marginLeft accounts for sidebar (72px) + its margins (16px + 16px) = 104px */}
+        {/* Container with gap for separated panels */}
+        {/* Desktop: positioned beside sidebar with correct width to prevent scrollbars */}
         <div 
           className={`${isMobile ? 'flex flex-col' : 'flex'}`}
           style={{
-            marginLeft: isMobile ? '0' : '104px', // Space for floating sidebar (72px + 32px padding)
-            padding: isMobile ? '0' : '16px',
-            paddingLeft: isMobile ? '0' : '0', // No left padding since we have margin
+            marginLeft: isMobile ? '0' : '104px', // Space for floating sidebar (72px + 32px margins)
+            marginTop: isMobile ? '0' : '16px',
+            marginBottom: isMobile ? '0' : '16px',
+            marginRight: isMobile ? '0' : '16px',
             gap: isMobile ? '0' : '16px',
-            height: isMobile ? '100vh' : 'calc(100vh - 32px)', // Full height minus padding
+            width: isMobile ? '100vw' : 'calc(100vw - 104px - 32px)', // Full width minus sidebar space and margins
+            height: isMobile ? '100vh' : 'calc(100vh - 32px)', // Full height minus top/bottom margins
             transition: 'all 0.3s ease-out',
             overflow: 'hidden'
           }}
