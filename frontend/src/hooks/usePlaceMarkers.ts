@@ -17,6 +17,12 @@ export function usePlaceMarkers(
   const [places, setPlaces] = useState<Place[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const hoveredStateIdRef = useRef<string | null>(null)
+  const placesRef = useRef<Place[]>([])
+
+  // Keep placesRef in sync with places
+  useEffect(() => {
+    placesRef.current = places
+  }, [places])
 
   // If filteredPlaces are provided, use them directly instead of loading from files
   useEffect(() => {
@@ -110,7 +116,8 @@ export function usePlaceMarkers(
 
         if (onPlaceHover) {
           const feature = e.features[0]
-          const coords = places.find(p => p.id === feature.properties.id)?.coordinates || [0, 0]
+          // Use placesRef.current to get the latest places array
+          const coords = placesRef.current.find(p => p.id === feature.properties.id)?.coordinates || [0, 0]
           const place: Place = {
             id: feature.properties.id,
             name: feature.properties.name,
