@@ -100,7 +100,7 @@ export default function App(){
             <Suspense fallback={<div className="p-8 text-center pt-20">Loading...</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/discover" element={<Discover isSidebarOpen={isSidebarOpen} onPlaceSelectFromAI={setPlaceSelectHandler} />} />
+                <Route path="/discover" element={<Discover isSidebarOpen={isSidebarOpen} isMobile={isMobile} onPlaceSelectFromAI={setPlaceSelectHandler} />} />
               </Routes>
             </Suspense>
           </div>
