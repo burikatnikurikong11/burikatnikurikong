@@ -30,11 +30,10 @@ function MapControls({
       className="fixed z-[1000] flex flex-col gap-0 shadow-lg overflow-hidden"
       style={{
         top: '20px',
-        right: isMobile ? '20px' : isSidebarOpen ? 'calc(30% + 20px)' : '20px',
+        right: '20px',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         borderRadius: '12px',
-        transition: 'right 0.3s ease-out',
       }}
     >
       {/* Map Style Button */}

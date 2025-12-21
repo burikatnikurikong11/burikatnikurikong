@@ -4,7 +4,7 @@ interface MunicipalityTooltipProps {
   municipalityName: string | null
   mouseX: number
   mouseY: number
-  isVisible?: boolean // Add visibility control prop
+  isVisible?: boolean
 }
 
 export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, isVisible = true }: MunicipalityTooltipProps) {
@@ -26,15 +26,14 @@ export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, 
 
   return (
     <div
-      className="fixed pointer-events-none z-[10000] transition-all duration-100 ease-out"
+      className="fixed pointer-events-none z-[10000] transition-all duration-75 ease-out"
       style={{
-        left: `${position.x + 15}px`,
-        top: `${position.y - 10}px`,
-        transform: 'translateY(-100%)'
+        left: `${position.x + 12}px`,
+        top: `${position.y + 12}px`,
       }}
     >
       <div
-        className="px-4 py-2 rounded-lg shadow-xl border-2 backdrop-blur-sm"
+        className="px-3 py-1.5 rounded-lg shadow-xl border-2 backdrop-blur-sm"
         style={{
           backgroundColor: 'rgba(30, 30, 30, 0.95)',
           borderColor: 'rgba(255, 215, 0, 0.8)',
@@ -51,9 +50,9 @@ export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, 
         
         {/* Municipality Name */}
         <div className="flex items-center gap-2">
-          {/* Crown/Location Icon */}
+          {/* Location Icon */}
           <svg
-            className="w-4 h-4 flex-shrink-0"
+            className="w-3.5 h-3.5 flex-shrink-0"
             fill="none"
             stroke="#FFD700"
             viewBox="0 0 24 24"
@@ -93,7 +92,7 @@ export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, 
           }}
         />
 
-        {/* Corner decorations (EU4-style) */}
+        {/* Corner decorations */}
         <div
           className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2"
           style={{ borderColor: 'rgba(255, 215, 0, 0.6)' }}
@@ -111,19 +110,6 @@ export default function MunicipalityTooltip({ municipalityName, mouseX, mouseY, 
           style={{ borderColor: 'rgba(255, 215, 0, 0.6)' }}
         />
       </div>
-
-      {/* Small arrow pointing to cursor */}
-      <div
-        className="absolute -bottom-1 left-0"
-        style={{
-          width: 0,
-          height: 0,
-          borderLeft: '6px solid transparent',
-          borderRight: '6px solid transparent',
-          borderTop: '6px solid rgba(255, 215, 0, 0.8)',
-          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
-        }}
-      />
     </div>
   )
 }
