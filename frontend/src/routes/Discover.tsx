@@ -5,6 +5,7 @@ import { useMap3DModels } from '../hooks/useMap3DModels'
 import { useMap3DMarkers, offsetCoordinates } from '../hooks/useMap3DMarkers'
 import { usePlaceMarkers } from '../hooks/usePlaceMarkers'
 import { touristSpotModels } from '../config/touristSpots'
+import { Model3DConfig } from '../types/model'
 import { MUNICIPALITY_GEOCODES, MUNICIPALITY_NAMES } from '../config/municipalities'
 import { isViewportInCatanduanes } from '../utils/catanduanesBounds'
 import { calculateFeatureBounds, calculateCameraOptions } from '../utils/municipalityBounds'
@@ -53,6 +54,9 @@ export default function Discover({
   const [mapStyle, setMapStyle] = useState<MapStyle>('satellite')
   const [isMapStyleOpen, setIsMapStyleOpen] = useState(false)
   
+  // Hovered 3D model marker state
+  const [hoveredModel, setHoveredModel] = useState<Model3DConfig | null>(null)
+  
   // Category filter state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   
@@ -82,10 +86,14 @@ export default function Discover({
     modelsEnabled
   } = useStore()
   
-  // Get selected spot data
-  const selectedSpot = useMemo(() => {
-    return touristSpotModels.find(m => m.id === selectedTouristSpot) || null
-  }, [selectedTouristSpot])
+  // Get selected or hovered spot data for info card display
+  const displayedSpot = useMemo(() => {
+    // Priority: selected spot > hovered model
+    if (selectedTouristSpot) {
+      return touristSpotModels.find(m => m.id === selectedTouristSpot) || null
+    }
+    return hoveredModel
+  }, [selectedTouristSpot, hoveredModel])
   
   // Load all tourist spots from GeoJSON files on mount
   useEffect(() => {
@@ -167,8 +175,22 @@ export default function Discover({
   // Handle closing tourist spot info
   const handleCloseSpotInfo = useCallback(() => {
     setSelectedTouristSpot(null)
+    setHoveredModel(null)
     setIsTooltipVisible(true)
   }, [setSelectedTouristSpot])
+  
+  // Handle 3D model marker hover
+  const handleModelHover = useCallback((model: Model3DConfig | null) => {
+    setHoveredModel(model)
+    if (model) {
+      setIsTooltipVisible(false)
+    } else {
+      // Only show tooltip if nothing else is selected/hovered
+      if (!selectedPlace && !selectedTouristSpot && !selectedMunicipalityGeocode) {
+        setIsTooltipVisible(true)
+      }
+    }
+  }, [selectedPlace, selectedTouristSpot, selectedMunicipalityGeocode])
 
   // Handle reset camera to initial view
   const handleResetCamera = useCallback(() => {
@@ -177,6 +199,7 @@ export default function Discover({
     setSelectedMunicipalityGeocode(null)
     setSelectedPlace(null)
     setHoveredPlace(null)
+    setHoveredModel(null)
     setSelectedPlaceMunicipalityGeocode(null)
     setSelectedTouristSpot(null)
     selectedMunicipalityRef.current = null
@@ -313,11 +336,11 @@ export default function Discover({
     if (place) {
       setIsTooltipVisible(false)
     } else {
-      if (!selectedPlace && !selectedTouristSpot && !selectedMunicipalityGeocode) {
+      if (!selectedPlace && !selectedTouristSpot && !selectedMunicipalityGeocode && !hoveredModel) {
         setIsTooltipVisible(true)
       }
     }
-  }, [selectedPlace, selectedTouristSpot, selectedMunicipalityGeocode])
+  }, [selectedPlace, selectedTouristSpot, selectedMunicipalityGeocode, hoveredModel])
 
   // Handle closing place info
   const handleClosePlaceInfo = useCallback(() => {
@@ -376,16 +399,16 @@ export default function Discover({
     }
   }, [onPlaceSelectFromAI, handlePlaceFromAI])
   
-  // Hide tooltip when a tourist spot is selected
+  // Hide tooltip when a tourist spot is selected or hovered
   useEffect(() => {
-    if (selectedTouristSpot) {
+    if (selectedTouristSpot || hoveredModel) {
       setIsTooltipVisible(false)
     } else {
       if (!selectedPlace && !selectedMunicipalityGeocode) {
         setIsTooltipVisible(true)
       }
     }
-  }, [selectedTouristSpot, selectedPlace, selectedMunicipalityGeocode])
+  }, [selectedTouristSpot, hoveredModel, selectedPlace, selectedMunicipalityGeocode])
 
   // Filter models by category
   const categoryFilteredModels = useMemo(() => {
@@ -952,10 +975,18 @@ export default function Discover({
     }
   }, [selectedMunicipalityGeocode, filteredModels.length, filteredTouristSpots.length, selectedCategory])
 
-  useMap3DMarkers(map, filteredModels, (modelId) => {
-    setSelectedTouristSpot(modelId)
-    setIsTooltipVisible(false)
-  }, [45, 25], 0)
+  // Use 3D markers with hover support
+  useMap3DMarkers(
+    map, 
+    filteredModels, 
+    (modelId) => {
+      setSelectedTouristSpot(modelId)
+      setIsTooltipVisible(false)
+    }, 
+    [45, 25], 
+    0,
+    handleModelHover // Pass hover handler
+  )
 
   // Pass filtered tourist spots to usePlaceMarkers
   usePlaceMarkers(map, activeMarkersGeocode, handlePlaceClick, handlePlaceHover, filteredTouristSpots)
@@ -1040,8 +1071,10 @@ export default function Discover({
         isVisible={isTooltipVisible}
       />
 
-      <TouristSpotInfo spot={selectedSpot} map={map} onClose={handleCloseSpotInfo} />
+      {/* Show TouristSpotInfo for selected or hovered model */}
+      <TouristSpotInfo spot={displayedSpot} map={map} onClose={handleCloseSpotInfo} />
 
+      {/* Show PlaceInfo for selected or hovered place */}
       {(hoveredPlace || selectedPlace) && (
         <PlaceInfo
           place={hoveredPlace || selectedPlace}
