@@ -34,8 +34,8 @@ export function offsetCoordinates(
  * 
  * Features:
  * - Automatic marker creation for all models
- * - Hover effects
- * - Click handlers to select tourist spots
+ * - Hover effects with info card display
+ * - Click handlers to select tourist spots with zoom animation
  * - Configurable marker styling with geographic offset
  * - Markers have independent geographic coordinates
  * - Vertical pixel offset for hovering effect
@@ -46,13 +46,15 @@ export function offsetCoordinates(
  * @param onMarkerClick - Callback function when marker is clicked
  * @param geoOffset - Optional [metersNorth, metersEast] geographic offset in meters
  * @param verticalOffset - Optional vertical pixel offset (negative = up, positive = down)
+ * @param onMarkerHover - Optional callback when marker is hovered (null to clear hover)
  */
 export function useMap3DMarkers(
   map: maplibregl.Map | null,
   models: Model3DConfig[],
   onMarkerClick: (modelId: string) => void,
   geoOffset: [number, number] = [0, 0], // Default: no geographic offset
-  verticalOffset: number = -100 // Default: 100 pixels up
+  verticalOffset: number = -100, // Default: 100 pixels up
+  onMarkerHover?: (model: Model3DConfig | null) => void // Optional hover callback
 ) {
   const markersRef = useRef<maplibregl.Marker[]>([])
 
@@ -166,6 +168,19 @@ export function useMap3DMarkers(
         metersEast
       )
 
+      // Add hover handlers if callback provided
+      if (onMarkerHover) {
+        container.addEventListener('mouseenter', (e) => {
+          e.stopPropagation()
+          onMarkerHover(model)
+        })
+        
+        container.addEventListener('mouseleave', (e) => {
+          e.stopPropagation()
+          onMarkerHover(null)
+        })
+      }
+
       // Add click handler
       container.addEventListener('click', (e) => {
         // Stop event propagation to prevent map click handler from interfering
@@ -212,5 +227,5 @@ export function useMap3DMarkers(
       markersRef.current.forEach(marker => marker.remove())
       markersRef.current = []
     }
-  }, [map, models, onMarkerClick, geoOffset, verticalOffset, createMarkerElement])
+  }, [map, models, onMarkerClick, onMarkerHover, geoOffset, verticalOffset, createMarkerElement])
 }
