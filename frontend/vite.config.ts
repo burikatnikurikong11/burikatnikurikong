@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     // Gzip compression
@@ -126,8 +126,8 @@ export default defineConfig({
     include: ['react', 'react-dom', 'maplibre-gl', 'three', 'zustand'],
     exclude: ['web-vitals'],
     esbuildOptions: {
-      drop: import.meta.env.PROD ? ['console', 'debugger'] : [],
+      drop: mode === 'production' ? ['console', 'debugger'] : [],
     }
   },
   cacheDir: 'node_modules/.vite',
-})
+}))
