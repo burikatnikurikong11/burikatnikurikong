@@ -56,10 +56,10 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
             </button>
           </div>
 
-          {/* Spacer to center the itinerary button */}
-          <div className="flex-1" />
+          {/* Smaller spacer - moves button up */}
+          <div style={{ flex: '0.7' }} />
 
-          {/* Plan/Itinerary Button - Centered */}
+          {/* Plan/Itinerary Button - Positioned higher than center */}
           <div className="px-4 flex-shrink-0">
             <div className="relative group">
               <button
@@ -91,8 +91,8 @@ function MinimalistSidebar({ isOpen, onClose, onToggleItinerary }: MinimalistSid
             </div>
           </div>
 
-          {/* Spacer to center the itinerary button */}
-          <div className="flex-1" />
+          {/* Larger spacer below button */}
+          <div style={{ flex: '1.3' }} />
 
           {/* Close button for mobile - Bottom */}
           <div className="px-4 pb-4 flex-shrink-0">
