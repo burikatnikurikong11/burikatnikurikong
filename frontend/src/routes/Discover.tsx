@@ -927,12 +927,14 @@ export default function Discover({
     return filtered
   }, [allTouristSpots, selectedCategory, activeMarkersGeocode, municipalityGeoJson])
   
-  // Filter 3D models by municipality
+  // Filter 3D models by municipality (show all if no municipality selected)
   const filteredModels = useMemo(() => {
+    // If no municipality is selected, show all category-filtered models
     if (!activeMarkersGeocode || !municipalityGeoJson) {
-      return []
+      return categoryFilteredModels
     }
 
+    // Filter by municipality bounds when one is selected
     const municipalityFeatures = municipalityGeoJson.features.filter(
       (feature) => {
         const geocode = feature.properties?.GEOCODE || feature.properties?.OBJECTID?.toString()
@@ -941,10 +943,10 @@ export default function Discover({
     )
 
     if (municipalityFeatures.length === 0) {
-      return []
+      return categoryFilteredModels
     }
 
-    let filtered = categoryFilteredModels.filter((model) => {
+    const filtered = categoryFilteredModels.filter((model) => {
       return municipalityFeatures.some((feature) => {
         return isPointInGeoJSONFeature(model.coordinates, feature)
       })
