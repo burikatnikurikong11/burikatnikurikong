@@ -7,6 +7,7 @@ import { usePlaceMarkers } from '../hooks/usePlaceMarkers'
 import { touristSpotModels } from '../config/touristSpots'
 import { MUNICIPALITY_GEOCODES, MUNICIPALITY_NAMES } from '../config/municipalities'
 import { isViewportInCatanduanes } from '../utils/catanduanesBounds'
+import { calculateFeatureBounds, calculateCameraOptions } from '../utils/municipalityBounds'
 import { getMapTilerKey } from '../utils/env'
 import { useStore } from '../state/store'
 import TouristSpotInfo from '../components/TouristSpotInfo'
@@ -706,6 +707,41 @@ export default function Discover({
                   updateBordersForSelection()
                   setHoveredMunicipalityName(null)
                   setIsTooltipVisible(false)
+
+                  // Calculate bounds for the clicked municipality feature
+                  const bounds = calculateFeatureBounds(clickedFeature)
+                  
+                  if (bounds) {
+                    // Get map container dimensions
+                    const container = mapInstance.getContainer()
+                    const width = container.clientWidth
+                    const height = container.clientHeight
+                    
+                    // Calculate padding for sidebar
+                    const sidebarPadding = isSidebarOpen && !isMobile ? getPaddingForSidebar() : { left: 0, right: 0, top: 0, bottom: 0 }
+                    const paddingObj = {
+                      top: sidebarPadding.top || 50,
+                      bottom: sidebarPadding.bottom || 50,
+                      left: sidebarPadding.left || 50,
+                      right: sidebarPadding.right || 50
+                    }
+                    
+                    // Calculate optimal camera position
+                    const cameraOptions = calculateCameraOptions(bounds, width, height, paddingObj)
+                    
+                    // Fly to the municipality with dynamic zoom and 40-degree tilt
+                    mapInstance.flyTo({
+                      center: cameraOptions.center,
+                      zoom: cameraOptions.zoom,
+                      pitch: 40,  // 40-degree camera tilt
+                      bearing: 0,
+                      padding: sidebarPadding,
+                      duration: ANIMATION_CONFIG.FLY_TO_DURATION,
+                      essential: true,
+                      // Ease-out quadratic for smooth animation
+                      easing: (t) => t * (2 - t)
+                    })
+                  }
                 }
               }
             }
