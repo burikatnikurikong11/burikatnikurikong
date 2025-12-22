@@ -53,7 +53,7 @@ export function useMap3DMarkers(
   models: Model3DConfig[],
   onMarkerClick: (modelId: string) => void,
   geoOffset: [number, number] = [0, 0], // Default: no geographic offset
-  verticalOffset: number = -100, // Default: 100 pixels up
+  verticalOffset: number = 0, // Default: 0 pixels (changed from -100)
   onMarkerHover?: (model: Model3DConfig | null) => void // Optional hover callback
 ) {
   const markersRef = useRef<maplibregl.Marker[]>([])
@@ -68,6 +68,8 @@ export function useMap3DMarkers(
       align-items: center;
       cursor: pointer;
       position: relative;
+      z-index: 10;
+      pointer-events: auto;
     `
     
     // Create circle container
@@ -76,6 +78,7 @@ export function useMap3DMarkers(
       width: 40px;
       height: 40px;
       position: relative;
+      pointer-events: auto;
     `
     
     // Create inner circle with gradient styling
@@ -92,6 +95,7 @@ export function useMap3DMarkers(
       transform-origin: center center;
       position: relative;
       overflow: hidden;
+      pointer-events: auto;
     `
     
     // Create image overlay
@@ -147,14 +151,21 @@ export function useMap3DMarkers(
   }, [])
 
   useEffect(() => {
-    if (!map) return
+    if (!map) {
+      console.log('⚠️ useMap3DMarkers: No map instance')
+      return
+    }
+
+    console.log(`🗺️ useMap3DMarkers: Creating ${models.length} markers`)
+    console.log('📍 Models:', models.map(m => ({ id: m.id, name: m.name, coords: m.coordinates })))
+    console.log('🎯 onMarkerHover provided:', !!onMarkerHover)
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
 
     // Create markers for each tourist spot
-    models.forEach((model) => {
+    models.forEach((model, index) => {
       const container = createMarkerElement(model.name || model.id)
 
       // Calculate independent geographic coordinates for the marker
@@ -168,14 +179,18 @@ export function useMap3DMarkers(
         metersEast
       )
 
+      console.log(`  ✓ Marker ${index + 1}: ${model.name} at [${markerCoordinates[0].toFixed(4)}, ${markerCoordinates[1].toFixed(4)}]`)
+
       // Add hover handlers if callback provided
       if (onMarkerHover) {
         container.addEventListener('mouseenter', (e) => {
+          console.log('🖱️ HOVER IN:', model.name)
           e.stopPropagation()
           onMarkerHover(model)
         })
         
         container.addEventListener('mouseleave', (e) => {
+          console.log('🖱️ HOVER OUT:', model.name)
           e.stopPropagation()
           onMarkerHover(null)
         })
@@ -183,6 +198,7 @@ export function useMap3DMarkers(
 
       // Add click handler
       container.addEventListener('click', (e) => {
+        console.log('🖱️ CLICK:', model.name)
         // Stop event propagation to prevent map click handler from interfering
         e.stopPropagation()
 
@@ -222,8 +238,11 @@ export function useMap3DMarkers(
       markersRef.current.push(marker)
     })
 
+    console.log(`✅ Created ${markersRef.current.length} markers successfully`)
+
     // Cleanup function
     return () => {
+      console.log('🧹 Cleaning up markers')
       markersRef.current.forEach(marker => marker.remove())
       markersRef.current = []
     }
