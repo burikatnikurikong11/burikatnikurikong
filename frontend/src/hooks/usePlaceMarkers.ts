@@ -242,6 +242,9 @@ export function usePlaceMarkers(
           promoteId: 'id',
         })
 
+        // CRITICAL FIX: Add POI marker layers WITHOUT specifying beforeId
+        // This ensures they are added on TOP of all existing layers (including GeoJSON)
+        // Making them the highest priority for click/hover events
         map.addLayer({
           id: PLACE_LAYER_HALO_ID,
           type: 'circle',
@@ -264,7 +267,7 @@ export function usePlaceMarkers(
               delay: 0,
             },
           },
-        })
+        }) // No beforeId parameter - adds to top!
 
         map.addLayer({
           id: PLACE_LAYER_ID,
@@ -289,9 +292,9 @@ export function usePlaceMarkers(
               delay: 0,
             },
           },
-        })
+        }) // No beforeId parameter - adds to top!
 
-        console.log('Place markers layers added successfully')
+        console.log('Place markers layers added successfully ON TOP of all layers')
 
         map.on('mousemove', PLACE_LAYER_ID, handleMouseMove)
         map.on('mouseleave', PLACE_LAYER_ID, handleMouseLeave)
