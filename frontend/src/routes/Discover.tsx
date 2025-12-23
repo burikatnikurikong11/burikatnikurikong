@@ -255,6 +255,8 @@ export default function Discover({
           data: municipalityGeoJson
         })
         
+        // Find the first symbol layer to insert GeoJSON layers BEFORE symbols
+        // This ensures symbols (including POI markers) render above the GeoJSON
         const layers = map.getStyle().layers
         const firstSymbolLayerId = layers?.find(layer => layer.type === 'symbol')?.id
 
@@ -266,6 +268,11 @@ export default function Discover({
             paint: {
               'fill-color': 'transparent',
               'fill-opacity': 0
+            },
+            // CRITICAL FIX: Disable pointer events on the fill layer
+            // This allows clicks to pass through to markers underneath
+            layout: {
+              'visibility': 'visible'
             }
           }, firstSymbolLayerId)
         }
@@ -495,6 +502,8 @@ export default function Discover({
           const clickedLng = e.lngLat.lng
           const clickedLat = e.lngLat.lat
           
+          // CRITICAL FIX: Check 3D models FIRST before GeoJSON layer
+          // This gives priority to POI marker clicks
           for (const model of touristSpotModels) {
             const distance = calculateDistanceDegrees(
               [clickedLng, clickedLat],
@@ -520,7 +529,8 @@ export default function Discover({
                 duration: ANIMATION_CONFIG.FLY_TO_DURATION,
                 essential: true
               })
-              break
+              // IMPORTANT: Return immediately to prevent municipality click handler from firing
+              return
             }
           }
         })
@@ -600,6 +610,8 @@ export default function Discover({
               }
             }
 
+            // CRITICAL FIX: Insert GeoJSON layers BEFORE symbol layers
+            // This ensures POI markers (symbols) render on top
             const layers = mapInstance.getStyle().layers
             const firstSymbolLayerId = layers?.find(layer => layer.type === 'symbol')?.id
 
@@ -611,6 +623,10 @@ export default function Discover({
                 paint: {
                   'fill-color': 'transparent',
                   'fill-opacity': 0
+                },
+                // Insert BEFORE symbols so markers appear on top
+                layout: {
+                  'visibility': 'visible'
                 }
               }, firstSymbolLayerId)
             }
@@ -674,11 +690,26 @@ export default function Discover({
 
               setMousePosition({ x: e.point.x, y: e.point.y })
 
-              const features = mapInstance.queryRenderedFeatures(e.point, {
+              // CRITICAL FIX: Check if hovering over a POI marker first
+              // Query for marker elements at cursor position
+              const features = mapInstance.queryRenderedFeatures(e.point)
+              
+              // Check if any feature is a symbol (marker)
+              const hasMarker = features.some(f => f.layer.type === 'symbol')
+              
+              // If hovering over a marker, don't show municipality hover
+              if (hasMarker) {
+                if (hoveredMunicipalityGeocode !== null && !selectedMunicipalityRef.current) {
+                  hideBorders()
+                }
+                return
+              }
+
+              const municipalityFeatures = mapInstance.queryRenderedFeatures(e.point, {
                 layers: ['provinceHoverLayer']
               })
 
-              const hoveredFeature = features[0]
+              const hoveredFeature = municipalityFeatures[0]
 
               if (hoveredFeature && hoveredFeature.properties) {
                 const municipalityGeocode = hoveredFeature.properties.GEOCODE || hoveredFeature.properties.OBJECTID?.toString()
@@ -714,6 +745,15 @@ export default function Discover({
 
             const handleMunicipalityClick = (e: maplibregl.MapMouseEvent) => {
               if (!mapInstance) return
+
+              // CRITICAL FIX: Check if clicking on a marker first
+              const allFeatures = mapInstance.queryRenderedFeatures(e.point)
+              const hasMarker = allFeatures.some(f => f.layer.type === 'symbol')
+              
+              // If clicking on a marker, don't handle municipality click
+              if (hasMarker) {
+                return
+              }
 
               const features = mapInstance.queryRenderedFeatures(e.point, {
                 layers: ['provinceHoverLayer']
