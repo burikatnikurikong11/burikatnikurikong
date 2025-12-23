@@ -6,7 +6,7 @@ interface MunicipalityModalProps {
   municipalityGeocode: string
   models: TouristSpotModel[]
   onClose: () => void
-  onSpotClick: (modelId: string) => void
+  onSpotClick: (modelId: string, coordinates?: [number, number], category?: string) => void
 }
 
 // Municipality data (you can expand this with real data later)
@@ -80,6 +80,18 @@ export default function MunicipalityModal({
 }: MunicipalityModalProps) {
   const municipalityName = MUNICIPALITY_NAMES[municipalityGeocode] || 'Unknown'
   const data = MUNICIPALITY_DATA[municipalityGeocode] || {}
+
+  const handleSpotClick = (model: TouristSpotModel) => {
+    // Extract coordinates from the model
+    const coordinates: [number, number] | undefined = 
+      model.longitude && model.latitude 
+        ? [model.longitude, model.latitude]
+        : undefined
+    
+    // Pass coordinates and category for zoom functionality
+    onSpotClick(model.id, coordinates, model.category)
+    onClose()
+  }
 
   return (
     <div
@@ -173,10 +185,7 @@ export default function MunicipalityModal({
               {models.slice(0, 5).map((model) => (
                 <button
                   key={model.id}
-                  onClick={() => {
-                    onSpotClick(model.id)
-                    onClose()
-                  }}
+                  onClick={() => handleSpotClick(model)}
                   className="w-full text-left p-3 rounded-lg transition-all hover:shadow-md"
                   style={{
                     backgroundColor: 'rgba(254, 243, 199, 0.3)',
